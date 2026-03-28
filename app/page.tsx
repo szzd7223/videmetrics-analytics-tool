@@ -48,7 +48,7 @@ export default function Home() {
             Paste any YouTube channel URL or handle and instantly see which videos are crushing it. Stop guessing, start analyzing.
           </p>
           
-          <SearchForm onSearch={handleSearch} />
+          <SearchForm onSearch={handleSearch} isLoading={loading} />
           
           {error && (
             <div className="mt-8 p-4 bg-red-900/30 border border-red-500/30 text-red-400 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-4">

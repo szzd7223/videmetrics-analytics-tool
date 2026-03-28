@@ -99,46 +99,78 @@ export const fetchChannel = async (identifier: { type: 'handle' | 'id'; value: s
 /**
  * Fetch latest videos from the uploads playlist
  */
-export const fetchLatestVideos = async (uploadsPlaylistId: string, maxResults = 30): Promise<VideoInfo[]> => {
+export const fetchLatestVideos = async (uploadsPlaylistId: string, maxResults = 150): Promise<VideoInfo[]> => {
   if (!API_KEY) throw new Error('YOUTUBE_API_KEY is missing');
 
-  // Step 1: Get Playlist Items (Video IDs)
-  const playlistUrl = `${BASE_URL}/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=${maxResults}&key=${API_KEY}`;
-  const playlistRes = await fetch(playlistUrl, { next: { revalidate: 3600 } });
-  
-  if (!playlistRes.ok) throw new Error('Failed to fetch playlist items');
-  const playlistData = await playlistRes.json();
-  
-  if (!playlistData.items || playlistData.items.length === 0) return [];
+  let allVideoIds: string[] = [];
+  let nextPageToken: string | undefined = undefined;
 
-  const videoIds = playlistData.items.map((item: any) => item.snippet.resourceId.videoId).join(',');
-  
-  // Step 2: Get Video Statistics
-  const videosUrl = `${BASE_URL}/videos?part=snippet,statistics&id=${videoIds}&key=${API_KEY}`;
-  const videosRes = await fetch(videosUrl, { next: { revalidate: 3600 } });
-  
-  if (!videosRes.ok) throw new Error('Failed to fetch video statistics');
-  const videosData = await videosRes.json();
+  // Step 1: Paginate through Playlist Items
+  while (allVideoIds.length < maxResults) {
+    const limit = Math.min(50, maxResults - allVideoIds.length);
+    let playlistUrl = `${BASE_URL}/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=${limit}&key=${API_KEY}`;
+    if (nextPageToken) playlistUrl += `&pageToken=${nextPageToken}`;
 
-  const videos: VideoInfo[] = videosData.items.map((item: any) => {
-    const viewCount = parseInt(item.statistics.viewCount) || 0;
-    const likeCount = parseInt(item.statistics.likeCount) || 0;
-    const commentCount = parseInt(item.statistics.commentCount) || 0;
-    
-    // Basic engagement rate: (Likes + Comments) / Views
-    const engagementRate = viewCount > 0 ? ((likeCount + commentCount) / viewCount) * 100 : 0;
+    const playlistRes = await fetch(playlistUrl, { next: { revalidate: 3600 } });
+    if (!playlistRes.ok) throw new Error('Failed to fetch playlist items');
+    const playlistData = await playlistRes.json();
 
-    return {
-      id: item.id,
-      title: item.snippet.title,
-      publishedAt: item.snippet.publishedAt,
-      thumbnailUrl: item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
-      viewCount,
-      likeCount,
-      commentCount,
-      engagementRate,
-    };
+    if (!playlistData.items || playlistData.items.length === 0) break;
+
+    const ids = playlistData.items.map((item: any) => item.snippet.resourceId.videoId);
+    allVideoIds.push(...ids);
+
+    nextPageToken = playlistData.nextPageToken;
+    if (!nextPageToken) break;
+  }
+
+  if (allVideoIds.length === 0) return [];
+
+  // Step 2: Chunk video IDs into batches of 50 for the statistics endpoint
+  const chunks = [];
+  for (let i = 0; i < allVideoIds.length; i += 50) {
+    chunks.push(allVideoIds.slice(i, i + 50));
+  }
+
+  // Step 3: Fetch statistics in parallel
+  const videosDataPromises = chunks.map(async (chunk) => {
+    const videoIds = chunk.join(',');
+    const videosUrl = `${BASE_URL}/videos?part=snippet,statistics&id=${videoIds}&key=${API_KEY}`;
+    const videosRes = await fetch(videosUrl, { next: { revalidate: 3600 } });
+    if (!videosRes.ok) throw new Error('Failed to fetch video statistics');
+    return videosRes.json();
   });
+
+  const videosDataResponses = await Promise.all(videosDataPromises);
+
+  // Step 4: Flatten and format the results
+  const videos: VideoInfo[] = [];
+
+  for (const videosData of videosDataResponses) {
+    if (!videosData.items) continue;
+    
+    for (const item of videosData.items) {
+      const viewCount = parseInt(item.statistics.viewCount) || 0;
+      const likeCount = parseInt(item.statistics.likeCount) || 0;
+      const commentCount = parseInt(item.statistics.commentCount) || 0;
+      
+      const engagementRate = viewCount > 0 ? ((likeCount + commentCount) / viewCount) * 100 : 0;
+
+      videos.push({
+        id: item.id,
+        title: item.snippet.title,
+        publishedAt: item.snippet.publishedAt,
+        thumbnailUrl: item.snippet.thumbnails.maxres?.url || item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default?.url,
+        viewCount,
+        likeCount,
+        commentCount,
+        engagementRate,
+      });
+    }
+  }
+
+  // Sort chronologically descending to ensure perfect ordering
+  videos.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
   return videos;
 };
