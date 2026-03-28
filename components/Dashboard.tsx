@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ChannelInfo, VideoInfo } from '@/lib/youtube'
 import { formatNumber, formatDate, cn } from '@/lib/utils'
 import Charts from '@/components/Charts'
@@ -107,16 +108,13 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
       </div>
 
       {/* 2. Channel Overview Card */}
-      <div className="flex flex-col md:flex-row items-center gap-6 bg-[#0A0A0A] border border-zinc-800 p-8 rounded-xl">
+      <a href={`https://youtube.com/channel/${channel.id}`} target="_blank" rel="noopener noreferrer" className="flex flex-col md:flex-row items-center gap-6 bg-[#0A0A0A] border border-zinc-800 p-8 rounded-xl hover:border-zinc-600 transition-colors">
         <img src={channel.thumbnailUrl} alt={channel.title} className="w-24 h-24 md:w-32 md:h-32 rounded-lg border border-zinc-800" />
         <div className="flex-1 text-center md:text-left">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
-            <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">{channel.title}</h1>
-            <span className="px-3 py-1 bg-white/10 text-white text-[10px] font-black border border-white/20 rounded uppercase tracking-widest">
-              Live Horizon
-            </span>
+            <h1 className="text-3xl font-black tracking-tighter text-white uppercase">{channel.title}</h1>
           </div>
-          <p className="text-stone-400 mb-6 max-w-2xl font-medium leading-relaxed">{channel.description || 'No channel description available.'}</p>
+          <p className="text-stone-400 mb-6 max-w-2xl font-medium leading-relaxed line-clamp-2">{channel.description || 'No channel description available.'}</p>
           <div className="flex flex-wrap justify-center md:justify-start gap-8">
             <div className="flex flex-col">
               <span className="text-[10px] text-stone-600 font-bold uppercase tracking-[0.2em] mb-1">Subscribers</span>
@@ -128,7 +126,7 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
             </div>
           </div>
         </div>
-      </div>
+      </a>
 
       {/* 3. Insight Cards Row */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -189,13 +187,16 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
             <div className="flex items-center gap-4">
               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Video Library</span>
               <div className="flex bg-zinc-900 border border-zinc-800 p-1 rounded-lg gap-1">
-                {['date', 'views', 'engagement', 'outlier'].map((type) => (
+                {['date', 'engagement', 'outlier'].map((type) => (
                   <button
                     key={type}
                     onClick={() => handleSort(type as any)}
                     className={cn("px-4 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-colors cursor-pointer", sortBy === type ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-200")}
                   >
-                    {type === 'date' ? 'NEWEST' : type === 'outlier' ? 'TOP OUTLIERS' : 'MOST ENGAGING'}
+                    {type === 'date' ? 'NEWEST' : 
+                     type === 'views' ? 'MOST VIEWED' : 
+                     type === 'engagement' ? 'MOST ENGAGING' : 
+                     'TOP OUTLIERS'}
                   </button>
                 ))}
               </div>
@@ -244,82 +245,97 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
           </div>
         )}
 
-        {/* Video Components */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {sortedVideos.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map(video => {
-            const daysSincePublished = Math.max(1, Math.floor((new Date().getTime() - new Date(video.publishedAt).getTime()) / (1000 * 60 * 60 * 24)))
-            const viewsPerDay = Math.floor(video.viewCount / daysSincePublished)
-            const totalEngagements = video.likeCount + video.commentCount
-            const viewersPerEngagement = totalEngagements > 0 ? Math.round(video.viewCount / totalEngagements) : 0
-            const engagementBadge = viewersPerEngagement > 0 ? `1 IN ${viewersPerEngagement}` : 'NO'
+        {/* Video Components with Smooth Transitions */}
+        <div className="relative min-h-[400px]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentPage}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {sortedVideos.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map(video => {
+                const daysSincePublished = Math.max(1, Math.floor((new Date().getTime() - new Date(video.publishedAt).getTime()) / (1000 * 60 * 60 * 24)))
+                const viewsPerDay = Math.floor(video.viewCount / daysSincePublished)
+                const totalEngagements = video.likeCount + video.commentCount
+                const viewersPerEngagement = totalEngagements > 0 ? Math.round(video.viewCount / totalEngagements) : 0
+                const engagementBadge = viewersPerEngagement > 0 ? `1 IN ${viewersPerEngagement}` : 'NO'
 
-            const outlierMultiplier = parseFloat((video.viewCount / Math.max(medianViews, 1)).toFixed(1))
-            const isOutlier = outlierMultiplier >= 1.5
+                const outlierMultiplier = parseFloat((video.viewCount / Math.max(medianViews, 1)).toFixed(1))
+                const isOutlier = outlierMultiplier >= 1.5
 
-            return (
-              <a href={`https://youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" key={video.id} className="bg-[#0A0A0A] border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition-all duration-300 group flex flex-col relative">
-                <div className="relative aspect-video overflow-hidden">
-                  <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out grayscale-[0.2] group-hover:grayscale-0" />
+                return (
+                  <a href={`https://youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" key={video.id} className="bg-[#0A0A0A] border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition-all duration-300 group flex flex-col relative">
+                    <div className="relative aspect-video overflow-hidden">
+                      <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out grayscale-[0.2] group-hover:grayscale-0" />
 
-                  {isOutlier && (
-                    <div className="absolute top-3 left-3 bg-red-900/80 text-white pl-3 pr-2 py-1 text-[10px] font-bold rounded shadow-sm border border-red-900/50 z-20 flex items-center justify-center gap-1 uppercase tracking-widest cursor-default backdrop-blur-md">
-                      <span>OUTLIER {outlierMultiplier}x</span>
-                      <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                        <TooltipHelp text={`This video massively overperformed the channel's mathematical baseline (${outlierMultiplier}x). Try analyzing its thumbnail layout and core topic selection.`} down />
+                      {isOutlier && (
+                        <div className="absolute top-3 left-3 bg-red-900/80 text-white pl-3 pr-2 py-1 text-[10px] font-bold rounded shadow-sm border border-red-900/50 z-20 flex items-center justify-center gap-1 uppercase tracking-widest cursor-default backdrop-blur-md">
+                          <span>OUTLIER {outlierMultiplier}x</span>
+                          <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                            <TooltipHelp text={`This video massively overperformed the channel's mathematical baseline (${outlierMultiplier}x). Try analyzing its thumbnail layout and core topic selection.`} down />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Engagement Badge */}
+                      <div className="absolute top-3 right-3 bg-blue-900/80 text-white px-3 py-1 text-[10px] font-bold rounded shadow-sm border border-blue-900/50 z-20 flex items-center justify-center gap-1.5 uppercase tracking-widest pointer-events-none backdrop-blur-md">
+                        {engagementBadge} <span className="text-[8px] font-bold opacity-80 mt-px">ENGAGED</span>
+                      </div>
+
+                      <div className="absolute bottom-3 right-3 bg-zinc-900/90 text-white px-2 py-1 text-[10px] font-bold tracking-widest rounded uppercase z-20 pointer-events-none border border-zinc-700/50">
+                        {formatDate(video.publishedAt)}
                       </div>
                     </div>
-                  )}
 
-                  {/* Engagement Badge */}
-                  <div className="absolute top-3 right-3 bg-blue-900/80 text-white px-3 py-1 text-[10px] font-bold rounded shadow-sm border border-blue-900/50 z-20 flex items-center justify-center gap-1.5 uppercase tracking-widest pointer-events-none backdrop-blur-md">
-                    {engagementBadge} <span className="text-[8px] font-bold opacity-80 mt-px">ENGAGED</span>
-                  </div>
-
-                  <div className="absolute bottom-3 right-3 bg-zinc-900/90 text-white px-2 py-1 text-[10px] font-bold tracking-widest rounded uppercase z-20 pointer-events-none border border-zinc-700/50">
-                    {formatDate(video.publishedAt)}
-                  </div>
-                </div>
-
-                <div className="p-5 flex-1 flex flex-col">
-                  <h3 className="text-zinc-100 font-bold text-[15px] mb-4 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{video.title}</h3>
-                  <div className="grid grid-cols-3 gap-2 mt-auto pt-4 border-t border-stone-800/80">
-                    <div className="flex flex-col" title="Normalizes total view count by the number of days since it was published">
-                      <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Views/Day</span>
-                      <span className="text-zinc-100 font-bold text-sm tracking-tight">{formatNumber(viewsPerDay)}</span>
+                    <div className="p-5 flex-1 flex flex-col">
+                      <h3 className="text-zinc-100 font-bold text-[15px] mb-4 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{video.title}</h3>
+                      <div className="grid grid-cols-3 gap-2 mt-auto pt-4 border-t border-stone-800/80">
+                        <div className="flex flex-col" title="Normalizes total view count by the number of days since it was published">
+                          <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Views/Day</span>
+                          <span className="text-zinc-100 font-bold text-sm tracking-tight">{formatNumber(viewsPerDay)}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Total Likes</span>
+                          <span className="text-orange-400 font-bold text-sm tracking-tight">{formatNumber(video.likeCount)}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Total Views</span>
+                          <span className="text-blue-400 font-bold text-sm tracking-tight">{formatNumber(video.viewCount)}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Total Likes</span>
-                      <span className="text-orange-400 font-bold text-sm tracking-tight">{formatNumber(video.likeCount)}</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Total Views</span>
-                      <span className="text-blue-400 font-bold text-sm tracking-tight">{formatNumber(video.viewCount)}</span>
-                    </div>
-                  </div>
-                </div>
-              </a>
-            )
-          })}
+                  </a>
+                )
+              })}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        {/* Pagination Console */}
+        {/* Pagination Console with Tactile Feedback */}
         {sortedVideos.length > PAGE_SIZE && (
           <div className="flex justify-between items-center mt-6 px-6 py-4 bg-[#0A0A0A] border border-zinc-800 rounded-xl mb-12">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors border border-stone-800 cursor-pointer"
+              className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors border border-zinc-800 cursor-pointer"
             >
               Previous
-            </button>
-            <span className="text-stone-500 text-[10px] font-bold tracking-widest uppercase">Page {currentPage} of {Math.ceil(sortedVideos.length / PAGE_SIZE)}</span>
-            <button
+            </motion.button>
+            <span className="text-zinc-500 text-[10px] font-bold tracking-widest uppercase">Page {currentPage} of {Math.ceil(sortedVideos.length / PAGE_SIZE)}</span>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(sortedVideos.length / PAGE_SIZE)))}
               disabled={currentPage === Math.ceil(sortedVideos.length / PAGE_SIZE)}
-              className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors border border-stone-800 cursor-pointer"
+              className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors border border-zinc-800 cursor-pointer"
             >
               Next
-            </button>
+            </motion.button>
           </div>
         )}
       </div>
