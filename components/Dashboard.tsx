@@ -5,13 +5,16 @@ import { ChannelInfo, VideoInfo } from '@/lib/youtube'
 import { formatNumber, formatDate, cn } from '@/lib/utils'
 import Charts from '@/components/Charts'
 
-const TooltipHelp = ({ text }: { text: string }) => (
+const TooltipHelp = ({ text, down = false }: { text: string, down?: boolean }) => (
   <div className="group/tooltip relative inline-flex ml-1.5 cursor-help align-middle">
     <div className="w-4 h-4 rounded-full border border-zinc-500/50 text-zinc-400 flex items-center justify-center text-[10px] font-bold hover:bg-white hover:text-zinc-900 transition-colors bg-zinc-800/80 shadow-md">?</div>
-    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-3.5 bg-zinc-800 border border-zinc-600 rounded-xl text-zinc-100 text-xs shadow-2xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-300 z-50 normal-case tracking-normal font-medium pointer-events-none drop-shadow-2xl text-center leading-relaxed">
+    <div className={cn(
+      "absolute left-1/2 -translate-x-1/2 w-64 p-3.5 bg-zinc-800 border border-zinc-600 rounded-xl text-zinc-100 text-xs shadow-2xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-300 z-50 normal-case tracking-normal font-medium pointer-events-none drop-shadow-2xl text-center leading-relaxed",
+      down ? "top-full mt-3" : "bottom-full mb-3"
+    )}>
       {text}
-      <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-zinc-600"></div>
-      <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-zinc-800 translate-y-[-2px]"></div>
+      <div className={cn("absolute left-1/2 -translate-x-1/2 border-[6px] border-transparent", down ? "bottom-full border-b-zinc-600" : "top-full border-t-zinc-600")}></div>
+      <div className={cn("absolute left-1/2 -translate-x-1/2 border-[5px] border-transparent", down ? "bottom-full border-b-zinc-800 translate-y-[2px]" : "top-full border-t-zinc-800 translate-y-[-2px]")}></div>
     </div>
   </div>
 )
@@ -20,6 +23,7 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
   const [timeFilter, setTimeFilter] = useState<'15' | '50' | '100' | 'all'>('all')
   const [sortBy, setSortBy] = useState<'date' | 'views' | 'engagement' | 'outlier'>('date')
   const [currentPage, setCurrentPage] = useState(1)
+  const [isAiCopied, setIsAiCopied] = useState(false)
   const PAGE_SIZE = 9
 
   // 1. Data Cohort Filtering (Global Engine)
@@ -173,7 +177,6 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-zinc-900/30 p-4 border border-zinc-800/80 rounded-2xl">
             <div className="flex items-center gap-3 ml-2">
               <h2 className="text-xl font-bold text-white tracking-tight">Video Library</h2>
-              <TooltipHelp text="The Outlier Score shows exactly how many times better a video performed compared to the channel's usual median views." />
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <div className="flex bg-zinc-900 border border-zinc-800 p-1 rounded-full gap-1 shadow-inner">
@@ -183,27 +186,55 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
                     onClick={() => handleSort(type as any)}
                     className={cn("px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors", sortBy === type ? "bg-white text-black shadow-sm" : "text-zinc-500 hover:text-zinc-200")}
                   >
-                    {type === 'date' ? 'NEWEST' : type === 'outlier' ? '🔥 TOP OUTLIERS' : 'MOST ENGAGING'}
+                    {type === 'date' ? 'NEWEST' : type === 'outlier' ? 'TOP OUTLIERS' : 'MOST ENGAGING'}
                   </button>
                 ))}
               </div>
-              <button
-                onClick={() => {
-                  const csvContent = "data:text/csv;charset=utf-8,"
-                    + "Title,Published Date,Views,Outlier Score,Engagement %,URL\n"
-                    + sortedVideos.map(v => `"${v.title.replace(/"/g, '""')}","${formatDate(v.publishedAt)}",${v.viewCount},${(v.viewCount / medianViews).toFixed(2)}x,${v.engagementRate?.toFixed(2) || 0},"https://youtube.com/watch?v=${v.id}"`).join("\n");
-                  const encodedUri = encodeURI(csvContent);
-                  const link = document.createElement("a");
-                  link.setAttribute("href", encodedUri);
-                  link.setAttribute("download", `${channel.title.replace(/\s+/g, '_')}_competitor_analysis.csv`);
-                  document.body.appendChild(link);
-                  link.click();
-                  link.remove();
-                }}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold tracking-widest rounded-full transition-colors shadow-lg"
-              >
-                EXPORT CSV
-              </button>
+              <div className="flex gap-2 w-full sm:w-auto items-center">
+                <button
+                  onClick={() => {
+                    const csvRows = sortedVideos.map(v => `"${v.title.replace(/"/g, '""')}","${formatDate(v.publishedAt)}",${v.viewCount},${(v.viewCount / medianViews).toFixed(2)}x,${v.engagementRate?.toFixed(2) || 0},"https://youtube.com/watch?v=${v.id}"`).join("\n");
+                    const prompt = `Act as an expert YouTube strategist. Give me detailed insights on this competitor channel based on my analytics data. Look for trends, specify what causes their viral outliers, identify video formats I should copy, and highlight any content gaps.\n\nHere is the raw data:\nTitle,Published Date,Views,Outlier Score,Engagement %,URL\n${csvRows}`;
+                    
+                    navigator.clipboard.writeText(prompt).then(() => {
+                      setIsAiCopied(true);
+                      setTimeout(() => {
+                        window.open('https://chatgpt.com', '_blank');
+                      }, 2500);
+                      setTimeout(() => {
+                        setIsAiCopied(false);
+                      }, 5000);
+                    });
+                  }}
+                  disabled={isAiCopied}
+                  className={cn(
+                    "flex items-center justify-center gap-2 px-4 py-2 text-[10px] sm:text-xs font-bold tracking-widest rounded-full transition-all shadow-lg border w-full sm:w-auto",
+                    isAiCopied 
+                      ? "bg-emerald-600 border-emerald-500 text-white shadow-[0_0_15px_rgba(5,150,105,0.5)]" 
+                      : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-zinc-700"
+                  )}
+                >
+                  <span>{isAiCopied ? '✅ COPIED! NOW PASTE (CTRL+V) IN CHATGPT' : '✨ ASK AI (CHATGPT)'}</span>
+                  {!isAiCopied && <TooltipHelp text="We generate an optimized analysis prompt loaded with your CSV data and save it to your clipboard. Due to strict browser security sandboxing, you must manually paste it (Ctrl+V) when ChatGPT opens." />}
+                </button>
+                <button
+                  onClick={() => {
+                    const csvContent = "data:text/csv;charset=utf-8,"
+                      + "Title,Published Date,Views,Outlier Score,Engagement %,URL\n"
+                      + sortedVideos.map(v => `"${v.title.replace(/"/g, '""')}","${formatDate(v.publishedAt)}",${v.viewCount},${(v.viewCount / medianViews).toFixed(2)}x,${v.engagementRate?.toFixed(2) || 0},"https://youtube.com/watch?v=${v.id}"`).join("\n");
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", `${channel.title.replace(/\s+/g, '_')}_competitor_analysis.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                  }}
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold tracking-widest rounded-full transition-colors shadow-lg"
+                >
+                  EXPORT CSV
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -229,8 +260,11 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
 
                   {/* Outlier Engine Badge */}
                   {isOutlier && (
-                    <div className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1.5 text-[10px] font-bold rounded-full shadow-xl border border-red-400/50 z-20 flex items-center gap-1 uppercase tracking-widest pointer-events-none">
-                      🔥 {outlierMultiplier}x OUTLIER
+                    <div className="absolute top-3 left-3 bg-red-600 text-white pl-3 pr-2 py-1.5 text-[10px] font-bold rounded-full shadow-xl border border-red-400/50 z-20 flex items-center gap-1 uppercase tracking-widest cursor-default">
+                      <span>OUTLIER {outlierMultiplier}x</span>
+                      <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                        <TooltipHelp text={`This video massively overperformed the channel's mathematical baseline (${outlierMultiplier}x). Try analyzing its thumbnail layout and core topic selection.`} down />
+                      </div>
                     </div>
                   )}
 
