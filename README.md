@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VidMetrics: Command Console
+### High-Octane YouTube Channel Analytics for Modern Creators
 
-## Getting Started
+VidMetrics is a tactical analytics dashboard designed to surface the true signal in the noise of YouTube data. Built with a Monochrome Brutalist aesthetic, it skips the vanity metrics and focuses on what actually drives growth: creative reliability, engagement velocity, and algorithmic momentum.
 
-First, run the development server:
+![VidMetrics Logo](app/icon.png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Core Intelligence: The Command Console
+
+The dashboard is built around a high-density Command Console that provides instant situational awareness.
+
+*   **Activity Intelligence**: A dynamic tempo engine that analyzes upload cadence and recency to classify channels as ACTIVE, INACTIVE, or HYPERACTIVE, providing tactical advice on algorithmic decay.
+*   **Viral Hit Rate**: Measures creative reliability by calculating the percentage of videos that exceed the channel's 1.5x median view baseline.
+*   **Engagement Velocity**: High-leverage tracking of Engagement per 100 Views (Efficiency of Impression), surfacing which topics are actually hitting the right audience.
+*   **Tactile Tooltips**: Deep-dive data breakdowns (Likes vs. Comments) available on every video card via hover tooltips.
+
+---
+
+## Security and Quota Hardening
+
+Designed to be public-ready, VidMetrics features a multi-layer defense system to protect the YouTube API quota:
+
+1.  **IP-Based Rate Limiting**: Capped at 15 searches per day per user.
+2.  **Global Killswitch**: A master lock that caps the entire app at 850 searches per day to prevent API key suspension during viral spikes.
+3.  **Honeypot Trap**: A stealthy bait input that detects and instantly rejects automated bot scrapers.
+
+---
+
+## Tech Stack
+
+- **Framework**: Next.js 16+ (App Router)
+- **Styling**: Tailwind CSS
+- **Charts**: Recharts
+- **Animations**: Framer Motion
+- **Security**: @upstash/ratelimit + Redis
+- **Data**: YouTube Data API v3
+
+---
+
+## Quick Start
+
+### 1. Prerequisites
+You will need a YouTube Data API Key and an Upstash Redis database.
+
+### 2. Environment Setup
+Create a .env.local file in the root directory:
+
+```env
+YOUTUBE_API_KEY=your_google_api_key
+UPSTASH_REDIS_REST_URL=your_upstash_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_token
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Run Locally
+```bash
+npm install
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment
 
-## Learn More
+This app is optimized for Vercel. 
 
-To learn more about Next.js, take a look at the following resources:
+1. Push the code to GitHub.
+2. Connect the repository to Vercel.
+3. Add the 3 environment variables from the .env.local to the Vercel project settings.
+4. **Deploy.**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Developed with Brutalist focus on data clarity in 2026.**
