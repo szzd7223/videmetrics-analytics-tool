@@ -2,15 +2,16 @@
 
 import { useState, useRef } from 'react'
 
-export default function SearchForm({ onSearch, isLoading }: { onSearch: (url: string) => void, isLoading?: boolean }) {
+export default function SearchForm({ onSearch, isLoading }: { onSearch: (url: string, honeypot?: string) => void, isLoading?: boolean }) {
   const [url, setUrl] = useState('')
+  const [honeypot, setHoneypot] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const submittedUrl = inputRef.current?.value || url
     if (submittedUrl.trim() && !isLoading) {
-      onSearch(submittedUrl.trim())
+      onSearch(submittedUrl.trim(), honeypot)
     }
   }
 
@@ -19,6 +20,17 @@ export default function SearchForm({ onSearch, isLoading }: { onSearch: (url: st
       <div className="pl-6 text-zinc-500">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
       </div>
+
+      {/* Honeypot Trap: Invisible to humans but attractive to bots */}
+      <input 
+        type="text" 
+        name="website_url" 
+        value={honeypot} 
+        onChange={(e) => setHoneypot(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        className="absolute opacity-0 pointer-events-none -left-[9999px]" 
+      />
       <input 
         ref={inputRef}
         type="text" 

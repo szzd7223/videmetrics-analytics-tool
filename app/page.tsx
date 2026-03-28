@@ -11,13 +11,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<{ channel: ChannelInfo, videos: VideoInfo[] } | null>(null)
 
-  const handleSearch = async (url: string) => {
+  const handleSearch = async (url: string, honeypot?: string) => {
     setLoading(true)
     setError(null)
     setData(null)
 
     try {
-      const result = await analyzeCompetitor(url)
+      const result = await analyzeCompetitor(url, honeypot)
       
       if ('error' in result) {
         setError(result.error)

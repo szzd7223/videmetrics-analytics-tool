@@ -71,8 +71,12 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
   }
 
   const avgEngRate = filteredVideos.length > 0 ? (filteredVideos.reduce((sum, v) => sum + (v.engagementRate || 0), 0) / filteredVideos.length) : 0
-  const avgLikes = filteredVideos.length > 0 ? Math.floor(filteredVideos.reduce((sum, v) => sum + v.likeCount, 0) / filteredVideos.length) : 0
-  const avgComments = filteredVideos.length > 0 ? Math.floor(filteredVideos.reduce((sum, v) => sum + v.commentCount, 0) / filteredVideos.length) : 0
+  const totalLikes = useMemo(() => filteredVideos.reduce((acc, v) => acc + (v.likeCount || 0), 0), [filteredVideos])
+  const totalComments = useMemo(() => filteredVideos.reduce((acc, v) => acc + (v.commentCount || 0), 0), [filteredVideos])
+  const totalEngagement = totalLikes + totalComments
+  
+  const avgLikes = filteredVideos.length > 0 ? totalLikes / filteredVideos.length : 0
+  const avgComments = filteredVideos.length > 0 ? totalComments / filteredVideos.length : 0
 
   // 4. Command Console Intelligence (Activity & Viral Engine)
   const postingActivity = useMemo(() => {
@@ -381,9 +385,11 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
                           <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Views/Day</span>
                           <span className="text-zinc-100 font-bold text-sm tracking-tight">{formatNumber(viewsPerDay)}</span>
                         </div>
-                        <div className="flex flex-col">
-                          <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Total Likes</span>
-                          <span className="text-orange-400 font-bold text-sm tracking-tight">{formatNumber(video.likeCount)}</span>
+                        <div className="flex flex-col" title={`Likes: ${formatNumber(video.likeCount)} | Comments: ${formatNumber(video.commentCount)}`}>
+                          <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1 cursor-help">Engagement</span>
+                          <span className="text-orange-400 font-bold text-sm tracking-tight cursor-help tabular-nums">
+                            {formatNumber(totalEngagements)}
+                          </span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Total Views</span>
