@@ -74,6 +74,46 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
   const avgLikes = filteredVideos.length > 0 ? Math.floor(filteredVideos.reduce((sum, v) => sum + v.likeCount, 0) / filteredVideos.length) : 0
   const avgComments = filteredVideos.length > 0 ? Math.floor(filteredVideos.reduce((sum, v) => sum + v.commentCount, 0) / filteredVideos.length) : 0
 
+  // 4. Command Console Intelligence (Activity & Viral Engine)
+  const postingActivity = useMemo(() => {
+    if (initialVideos.length < 2) return { status: 'UNKNOWN', label: 'NEW CHANNEL', tooltip: 'Not enough data to determine tempo.' }
+    
+    const now = new Date().getTime()
+    const lastPostDate = new Date(initialVideos[0].publishedAt).getTime()
+    const daysSinceLast = (now - lastPostDate) / (1000 * 60 * 60 * 24)
+    
+    // Last 10 videos cadence
+    const recentBatch = initialVideos.slice(0, Math.min(10, initialVideos.length))
+    const totalDaysSpan = (new Date(recentBatch[0].publishedAt).getTime() - new Date(recentBatch[recentBatch.length - 1].publishedAt).getTime()) / (1000 * 60 * 60 * 24)
+    const avgCadence = totalDaysSpan / (recentBatch.length - 1)
+
+    if (daysSinceLast > 21) return { status: 'CRITICAL', label: 'DRY', tooltip: 'No uploads in over 3 weeks. Algorithmic decay is likely. Distribution reach will be restricted until consistency returns.' }
+    if (daysSinceLast > 10) return { status: 'WARNING', label: 'INACTIVE', tooltip: 'Upload gap detected. The audience pool is cooling down. A new upload is required to re-establish momentum.' }
+    if (avgCadence <= 2) return { status: 'SUCCESS', label: 'HYPERACTIVE', tooltip: 'Aggressive posting schedule. High visibility, but monitor for viewer fatigue and quality dips.' }
+    return { status: 'NORMAL', label: 'ACTIVE', tooltip: 'Consistent posting rhythm. Signals healthy growth and reliable channel management to the algorithm.' }
+  }, [initialVideos])
+
+  const lastPostText = useMemo(() => {
+    if (initialVideos.length === 0) return 'Never'
+    const days = Math.floor((new Date().getTime() - new Date(initialVideos[0].publishedAt).getTime()) / (1000 * 60 * 60 * 24))
+    if (days === 0) return 'Today'
+    if (days === 1) return 'Yesterday'
+    return `${days}d ago`
+  }, [initialVideos])
+
+  const viralHitRate = useMemo(() => {
+    if (filteredVideos.length === 0) return 0
+    const hits = filteredVideos.filter(v => (v.viewCount / medianViews) >= 1.5).length
+    return (hits / filteredVideos.length) * 100
+  }, [filteredVideos, medianViews])
+
+  const engagementVelocity = useMemo(() => {
+    if (filteredVideos.length === 0) return 0
+    const totalViews = filteredVideos.reduce((sum, v) => sum + v.viewCount, 0)
+    const totalLikes = filteredVideos.reduce((sum, v) => sum + v.likeCount, 0)
+    return (totalLikes / totalViews) * 100
+  }, [filteredVideos])
+
   return (
     <div className="w-full max-w-6xl mx-auto mt-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 fade-in pb-20">
 
@@ -107,34 +147,72 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
         </div>
       </div>
 
-      {/* 2. Channel Overview Card */}
-      <a href={`https://youtube.com/channel/${channel.id}`} target="_blank" rel="noopener noreferrer" className="flex flex-col md:flex-row items-center gap-6 bg-[#0A0A0A] border border-zinc-800 p-8 rounded-xl hover:border-zinc-600 transition-colors">
-        <img src={channel.thumbnailUrl} alt={channel.title} className="w-24 h-24 md:w-32 md:h-32 rounded-lg border border-zinc-800" />
-        <div className="flex-1 text-center md:text-left">
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
-            <h1 className="text-3xl font-black tracking-tighter text-white uppercase">{channel.title}</h1>
+      {/* 2. Channel Overview Card (Command Console Layout) */}
+      <a 
+        href={`https://youtube.com/channel/${channel.id}`} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="grid grid-cols-1 lg:grid-cols-5 gap-8 bg-[#0A0A0A] border border-zinc-800 p-8 rounded-xl hover:border-zinc-700 transition-all duration-300 group cursor-pointer"
+      >
+        {/* Left: Bio Info */}
+        <div className="lg:col-span-3 flex flex-col md:flex-row items-center lg:items-start gap-6">
+          <img src={channel.thumbnailUrl} alt={channel.title} className="w-24 h-24 md:w-32 md:h-32 rounded-lg border border-zinc-800 group-hover:border-zinc-600 transition-colors shrink-0" />
+          <div className="flex-1 text-center md:text-left">
+            <h1 className="text-3xl font-black tracking-tighter text-white uppercase mb-2 group-hover:text-blue-400 transition-colors leading-none">{channel.title}</h1>
+            <p className="text-zinc-400 mb-0 max-w-2xl font-medium leading-relaxed line-clamp-2 text-sm">{channel.description || 'No channel description available.'}</p>
           </div>
-          <p className="text-stone-400 mb-6 max-w-2xl font-medium leading-relaxed line-clamp-2">{channel.description || 'No channel description available.'}</p>
-          <div className="flex flex-wrap justify-center md:justify-start gap-8">
-            <div className="flex flex-col">
-              <span className="text-[10px] text-stone-600 font-bold uppercase tracking-[0.2em] mb-1">Subscribers</span>
-              <span className="text-white font-bold tracking-tight">{formatNumber(channel.subscriberCount)}</span>
+        </div>
+
+        {/* Right: Health Metrics Grid (2x2) */}
+        <div className="lg:col-span-2 grid grid-cols-2 gap-3 h-full">
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 flex flex-col justify-center">
+            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Subscribers</span>
+            <span className="text-lg font-bold text-white tracking-tight">{formatNumber(channel.subscriberCount)}</span>
+          </div>
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 flex flex-col justify-center">
+            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Total Videos</span>
+            <span className="text-lg font-bold text-white tracking-tight">{formatNumber(channel.videoCount)}</span>
+          </div>
+          <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 flex flex-col justify-center">
+            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Last Posted</span>
+            <span className="text-lg font-bold text-white tracking-tight">{lastPostText}</span>
+          </div>
+          <div className={cn(
+            "bg-zinc-900/50 border rounded-lg p-3 flex flex-col justify-center relative overflow-visible",
+            postingActivity.status === 'SUCCESS' ? "border-emerald-900/50" : 
+            postingActivity.status === 'WARNING' ? "border-amber-900/50" : 
+            postingActivity.status === 'CRITICAL' ? "border-red-900/50" : "border-zinc-800"
+          )}>
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Activity</span>
+              <TooltipHelp text={postingActivity.tooltip} down />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] text-stone-600 font-bold uppercase tracking-[0.2em] mb-1">Total Videos</span>
-              <span className="text-white font-bold tracking-tight">{formatNumber(channel.videoCount)}</span>
-            </div>
+            <span className={cn(
+              "text-lg font-black tracking-tighter",
+              postingActivity.status === 'SUCCESS' ? "text-emerald-400" : 
+              postingActivity.status === 'WARNING' ? "text-amber-400" : 
+              postingActivity.status === 'CRITICAL' ? "text-red-400" : "text-white"
+            )}>
+              {postingActivity.label}
+            </span>
           </div>
         </div>
       </a>
 
-      {/* 3. Insight Cards Row */}
+      {/* 3. Insight Cards Row (Expanded Strategic Metrics) */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* Metric 1: Viral Hit Rate */}
         <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Subscribers</span>
-          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(channel.subscriberCount)}</span>
+          <span className="text-[10px] text-white font-bold uppercase tracking-widest mb-2 flex flex-col sm:flex-row items-center w-full justify-center md:justify-start gap-1 text-center md:text-left">
+            <span>Viral Hit Rate</span>
+            <TooltipHelp text="The % of your videos that reached at least 1.5x of your usual baseline. This measures creative reliability." />
+          </span>
+          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">
+            {viralHitRate.toFixed(1)}%
+          </span>
         </div>
 
+        {/* Metric 2: Median Views */}
         <div className="bg-[#0A0A0A] border border-white/10 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-white/30 transition-colors overflow-visible h-full">
           <span className="text-[10px] text-white font-bold uppercase tracking-widest mb-2 flex flex-col sm:flex-row items-center w-full justify-center md:justify-start gap-1 text-center md:text-left">
             <span>Median Views</span>
@@ -145,24 +223,30 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
           </span>
         </div>
 
+        {/* Metric 3: Likes per 100 */}
         <div className="bg-[#0A0A0A] border border-white/10 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-white/30 transition-colors overflow-visible h-full">
           <span className="text-[10px] text-zinc-200 font-bold uppercase tracking-widest mb-2 flex flex-col sm:flex-row items-center w-full justify-center md:justify-start gap-1 text-center md:text-left">
-            <span>Engagement</span>
-            <TooltipHelp text="How active the viewers are. A 5% rate means 5 out of 100 viewers liked or commented." />
+            <span>Velocity</span>
+            <TooltipHelp text="Likes per 100 views. This measures the 'Efficiency of Impression.' High velocity means you are hitting the right audience." />
           </span>
+          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">
+            {engagementVelocity.toFixed(1)} <span className="text-[10px] opacity-40">/100</span>
+          </span>
+        </div>
+
+        {/* Metric 4: Avg. Engagement */}
+        <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
+          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Engagement</span>
           <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{avgEngRate.toFixed(2)}%</span>
         </div>
 
-        <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Channel Views</span>
-          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(channel.viewCount)}</span>
-        </div>
-
+        {/* Metric 5: Avg. Likes */}
         <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
           <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Avg. Likes</span>
           <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(avgLikes)}</span>
         </div>
 
+        {/* Metric 6: Avg. Comments */}
         <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
           <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Avg. Comments</span>
           <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(avgComments)}</span>
