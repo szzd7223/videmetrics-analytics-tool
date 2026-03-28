@@ -5,19 +5,22 @@ import { ChannelInfo, VideoInfo } from '@/lib/youtube'
 import { formatNumber, formatDate, cn } from '@/lib/utils'
 import Charts from '@/components/Charts'
 
-const TooltipHelp = ({ text, down = false }: { text: string, down?: boolean }) => (
-  <div className="group/tooltip relative inline-flex ml-1.5 cursor-help align-middle">
-    <div className="w-4 h-4 rounded-full border border-zinc-500/50 text-zinc-400 flex items-center justify-center text-[10px] font-bold hover:bg-white hover:text-zinc-900 transition-colors bg-zinc-800/80 shadow-md">?</div>
-    <div className={cn(
-      "absolute left-1/2 -translate-x-1/2 w-64 p-3.5 bg-zinc-800 border border-zinc-600 rounded-xl text-zinc-100 text-xs shadow-2xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-300 z-50 normal-case tracking-normal font-medium pointer-events-none drop-shadow-2xl text-center leading-relaxed",
-      down ? "top-full mt-3" : "bottom-full mb-3"
-    )}>
-      {text}
-      <div className={cn("absolute left-1/2 -translate-x-1/2 border-[6px] border-transparent", down ? "bottom-full border-b-zinc-600" : "top-full border-t-zinc-600")}></div>
-      <div className={cn("absolute left-1/2 -translate-x-1/2 border-[5px] border-transparent", down ? "bottom-full border-b-zinc-800 translate-y-[2px]" : "top-full border-t-zinc-800 translate-y-[-2px]")}></div>
+const TooltipHelp = ({ text, down = false }: { text: string, down?: boolean }) => {
+  const tooltipClasses = cn(
+    "absolute left-1/2 -translate-x-1/2 w-64 p-3 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-100 text-xs shadow-md opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-300 z-50 normal-case tracking-normal font-medium pointer-events-none text-center leading-relaxed",
+    down ? "top-full mt-2" : "bottom-full mb-2"
+  )
+  
+  return (
+    <div className="group/tooltip relative inline-flex cursor-help align-middle ml-1">
+      <div className="w-3.5 h-3.5 rounded-sm border border-zinc-700 text-zinc-500 flex items-center justify-center text-[10px] font-bold hover:bg-white hover:text-black transition-colors">?</div>
+      <div className={tooltipClasses}>
+        {text}
+        <div className={cn("absolute left-1/2 -translate-x-1/2 border-[5px] border-transparent", down ? "bottom-full border-b-zinc-800 translate-y-[2px]" : "top-full border-t-zinc-800 translate-y-[-2px]")}></div>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 export default function Dashboard({ channel, initialVideos }: { channel: ChannelInfo, initialVideos: VideoInfo[] }) {
   const [timeFilter, setTimeFilter] = useState<'15' | '50' | '100' | 'all'>('all')
@@ -28,14 +31,12 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
 
   // 1. Data Cohort Filtering (Global Engine)
   const filteredVideos = useMemo(() => {
-    // initialVideos is inherently sorted recursively descending by fetchLatestVideos API
     if (timeFilter === '15') return initialVideos.slice(0, 15)
     if (timeFilter === '50') return initialVideos.slice(0, 50)
     if (timeFilter === '100') return initialVideos.slice(0, 100)
-    return initialVideos // 'all' equates to MAX History (Up to 150 videos)
+    return initialVideos
   }, [initialVideos, timeFilter])
 
-  // Re-calculate Median Views strictly based on the current time window
   const medianViews = useMemo(() => {
     const viewsArray = [...filteredVideos].map(v => v.viewCount).sort((a, b) => a - b)
     if (viewsArray.length === 0) return 1
@@ -44,7 +45,6 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
       : viewsArray[Math.floor(viewsArray.length / 2)]
   }, [filteredVideos])
 
-  // 2. Sorting Logic
   const sortedVideos = useMemo(() => {
     return [...filteredVideos].sort((a, b) => {
       if (sortBy === 'date') return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
@@ -69,7 +69,6 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
     setCurrentPage(1)
   }
 
-  // 3. Dynamic Calculated Insights based strictly on filtered time window
   const avgEngRate = filteredVideos.length > 0 ? (filteredVideos.reduce((sum, v) => sum + (v.engagementRate || 0), 0) / filteredVideos.length) : 0
   const avgLikes = filteredVideos.length > 0 ? Math.floor(filteredVideos.reduce((sum, v) => sum + v.likeCount, 0) / filteredVideos.length) : 0
   const avgComments = filteredVideos.length > 0 ? Math.floor(filteredVideos.reduce((sum, v) => sum + v.commentCount, 0) / filteredVideos.length) : 0
@@ -78,12 +77,12 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
     <div className="w-full max-w-6xl mx-auto mt-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 fade-in pb-20">
 
       {/* 1. Global Time Filter Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-zinc-900 border border-zinc-800 p-3 pl-6 rounded-3xl shadow-lg">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#0A0A0A] border border-zinc-800 p-3 pl-6 rounded-xl">
         <h2 className="text-zinc-500 font-bold text-xs uppercase tracking-widest flex items-center">
           Global Analysis Horizon
           <TooltipHelp text="Select a data cohort to instantly recalculate all median baselines, outlier scores, and historical trajectories strictly based on those recency blocks." />
         </h2>
-        <div className="flex bg-black/50 border border-zinc-800 p-1.5 rounded-full gap-1 shadow-inner overflow-x-auto w-full xl:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex bg-black/50 border border-zinc-800 p-1.5 rounded-lg gap-1 shadow-inner overflow-x-auto w-full xl:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {[
             { id: '15', label: 'LAST 15 VIDEOS', sub: 'Short-term trend' },
             { id: '50', label: 'LAST 50 VIDEOS', sub: 'Mid-term trend' },
@@ -94,9 +93,9 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
               key={tf.id}
               onClick={() => handleTimeFilter(tf.id as any)}
               className={cn(
-                "px-4 sm:px-6 py-1.5 sm:py-2 rounded-full flex flex-col items-center justify-center transition-all duration-300 shrink-0",
+                "px-4 sm:px-6 py-1.5 sm:py-2 rounded-md flex flex-col items-center justify-center transition-all duration-300 shrink-0 cursor-pointer",
                 timeFilter === tf.id
-                  ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]"
+                  ? "bg-white text-black font-bold"
                   : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/50"
               )}
             >
@@ -108,55 +107,67 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
       </div>
 
       {/* 2. Channel Overview Card */}
-      <div className="flex flex-col md:flex-row items-center gap-6 bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl shadow-2xl backdrop-blur-xl">
-        <img src={channel.thumbnailUrl} alt={channel.title} className="w-24 h-24 md:w-32 md:h-32 rounded-full border border-zinc-700 shadow-xl" />
+      <div className="flex flex-col md:flex-row items-center gap-6 bg-[#0A0A0A] border border-zinc-800 p-8 rounded-xl">
+        <img src={channel.thumbnailUrl} alt={channel.title} className="w-24 h-24 md:w-32 md:h-32 rounded-lg border border-zinc-800" />
         <div className="flex-1 text-center md:text-left">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">{channel.title}</h1>
-          <p className="text-zinc-400 font-medium text-lg mb-4">{channel.customUrl}</p>
-          <p className="text-zinc-500 text-sm line-clamp-2 leading-relaxed max-w-3xl">{channel.description}</p>
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-2">
+            <h1 className="text-3xl font-black tracking-tighter text-white uppercase italic">{channel.title}</h1>
+            <span className="px-3 py-1 bg-white/10 text-white text-[10px] font-black border border-white/20 rounded uppercase tracking-widest">
+              Live Horizon
+            </span>
+          </div>
+          <p className="text-stone-400 mb-6 max-w-2xl font-medium leading-relaxed">{channel.description || 'No channel description available.'}</p>
+          <div className="flex flex-wrap justify-center md:justify-start gap-8">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-stone-600 font-bold uppercase tracking-[0.2em] mb-1">Subscribers</span>
+              <span className="text-white font-bold tracking-tight">{formatNumber(channel.subscriberCount)}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] text-stone-600 font-bold uppercase tracking-[0.2em] mb-1">Total Videos</span>
+              <span className="text-white font-bold tracking-tight">{formatNumber(channel.videoCount)}</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* 3. Insight Cards Row */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div className="bg-zinc-900/50 border border-zinc-800 p-5 rounded-3xl shadow-lg flex flex-col items-center md:items-start group hover:border-zinc-700 transition-colors">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Subscribers</span>
-          <span className="text-2xl font-bold text-white tracking-tight">{formatNumber(channel.subscriberCount)}</span>
+        <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
+          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Subscribers</span>
+          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(channel.subscriberCount)}</span>
         </div>
 
-        <div className="bg-zinc-900/50 border border-red-900/30 p-5 rounded-3xl shadow-lg flex flex-col items-center md:items-start relative overflow-visible group">
-          <div className="absolute inset-0 bg-red-500/5 rounded-3xl opacity-50 group-hover:opacity-100 transition-opacity z-0"></div>
-          <span className="text-[10px] text-red-500 font-bold uppercase tracking-widest mb-2 flex items-center relative z-10 w-full justify-center md:justify-start">
-            Median Views
+        <div className="bg-[#0A0A0A] border border-white/10 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-white/30 transition-colors overflow-visible h-full">
+          <span className="text-[10px] text-white font-bold uppercase tracking-widest mb-2 flex flex-col sm:flex-row items-center w-full justify-center md:justify-start gap-1 text-center md:text-left">
+            <span>Median Views</span>
             <TooltipHelp text="The typical views for a video. We use Median instead of Average so rare viral hits don't skew the baseline." />
           </span>
-          <span className="text-2xl font-bold text-white tracking-tight relative z-10">
+          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">
             {filteredVideos.length === 0 ? '0' : formatNumber(medianViews)}
           </span>
         </div>
 
-        <div className="bg-zinc-900/50 border border-blue-900/30 p-5 rounded-3xl shadow-lg flex flex-col items-center md:items-start relative overflow-visible group">
-          <div className="absolute inset-0 bg-blue-500/5 rounded-3xl opacity-50 group-hover:opacity-100 transition-opacity z-0"></div>
-          <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mb-2 flex items-center relative z-10 w-full justify-center md:justify-start">
-            Engagement
+        <div className="bg-[#0A0A0A] border border-white/10 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-white/30 transition-colors overflow-visible h-full">
+          <span className="text-[10px] text-zinc-200 font-bold uppercase tracking-widest mb-2 flex flex-col sm:flex-row items-center w-full justify-center md:justify-start gap-1 text-center md:text-left">
+            <span>Engagement</span>
             <TooltipHelp text="How active the viewers are. A 5% rate means 5 out of 100 viewers liked or commented." />
           </span>
-          <span className="text-2xl font-bold text-white tracking-tight relative z-10">{avgEngRate.toFixed(2)}%</span>
+          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{avgEngRate.toFixed(2)}%</span>
         </div>
 
-        <div className="bg-zinc-900/50 border border-zinc-800 p-5 rounded-3xl shadow-lg flex flex-col items-center md:items-start group hover:border-zinc-700 transition-colors">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Channel Views</span>
-          <span className="text-2xl font-bold text-white tracking-tight">{formatNumber(channel.viewCount)}</span>
+        <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
+          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Channel Views</span>
+          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(channel.viewCount)}</span>
         </div>
 
-        <div className="bg-zinc-900/50 border border-zinc-800 p-5 rounded-3xl shadow-lg flex flex-col items-center md:items-start group hover:border-zinc-700 transition-colors">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Avg. Likes / Video</span>
-          <span className="text-2xl font-bold text-white tracking-tight">{formatNumber(avgLikes)}</span>
+        <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
+          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Avg. Likes</span>
+          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(avgLikes)}</span>
         </div>
 
-        <div className="bg-zinc-900/50 border border-zinc-800 p-5 rounded-3xl shadow-lg flex flex-col items-center md:items-start group hover:border-zinc-700 transition-colors">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Avg. Comments / Video</span>
-          <span className="text-2xl font-bold text-white tracking-tight">{formatNumber(avgComments)}</span>
+        <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
+          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Avg. Comments</span>
+          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(avgComments)}</span>
         </div>
       </div>
 
@@ -166,7 +177,7 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
           <Charts videos={filteredVideos} />
         </div>
       ) : (
-        <div className="w-full h-32 bg-zinc-900/30 border border-zinc-800/80 rounded-3xl flex items-center justify-center text-zinc-500 font-bold uppercase tracking-widest text-xs">
+        <div className="w-full h-32 bg-[#0C0C0C] border border-stone-800 rounded-xl flex items-center justify-center text-stone-500 font-bold uppercase tracking-widest text-xs">
           Not enough videos in this timeframe to generate charts.
         </div>
       )}
@@ -174,67 +185,61 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
       {/* 5. Video Table/Grid with Filters */}
       <div className="space-y-6 pt-4">
         {filteredVideos.length > 0 && (
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-zinc-900/30 p-4 border border-zinc-800/80 rounded-2xl">
-            <div className="flex items-center gap-3 ml-2">
-              <h2 className="text-xl font-bold text-white tracking-tight">Video Library</h2>
-            </div>
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="flex bg-zinc-900 border border-zinc-800 p-1 rounded-full gap-1 shadow-inner">
-                {['date', 'outlier', 'engagement'].map((type) => (
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-[#0A0A0A] p-4 border border-zinc-800 rounded-xl">
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Video Library</span>
+              <div className="flex bg-zinc-900 border border-zinc-800 p-1 rounded-lg gap-1">
+                {['date', 'views', 'engagement', 'outlier'].map((type) => (
                   <button
                     key={type}
                     onClick={() => handleSort(type as any)}
-                    className={cn("px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors", sortBy === type ? "bg-white text-black shadow-sm" : "text-zinc-500 hover:text-zinc-200")}
+                    className={cn("px-4 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-colors cursor-pointer", sortBy === type ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-200")}
                   >
                     {type === 'date' ? 'NEWEST' : type === 'outlier' ? 'TOP OUTLIERS' : 'MOST ENGAGING'}
                   </button>
                 ))}
               </div>
-              <div className="flex gap-2 w-full sm:w-auto items-center">
-                <button
-                  onClick={() => {
-                    const csvRows = sortedVideos.map(v => `"${v.title.replace(/"/g, '""')}","${formatDate(v.publishedAt)}",${v.viewCount},${(v.viewCount / medianViews).toFixed(2)}x,${v.engagementRate?.toFixed(2) || 0},"https://youtube.com/watch?v=${v.id}"`).join("\n");
-                    const prompt = `Act as an expert YouTube strategist. Give me detailed insights on this competitor channel based on my analytics data. Look for trends, specify what causes their viral outliers, identify video formats I should copy, and highlight any content gaps.\n\nHere is the raw data:\nTitle,Published Date,Views,Outlier Score,Engagement %,URL\n${csvRows}`;
-                    
-                    navigator.clipboard.writeText(prompt).then(() => {
-                      setIsAiCopied(true);
-                      setTimeout(() => {
-                        window.open('https://chatgpt.com', '_blank');
-                      }, 2500);
-                      setTimeout(() => {
-                        setIsAiCopied(false);
-                      }, 5000);
-                    });
-                  }}
-                  disabled={isAiCopied}
-                  className={cn(
-                    "flex items-center justify-center gap-2 px-4 py-2 text-[10px] sm:text-xs font-bold tracking-widest rounded-full transition-all shadow-lg border w-full sm:w-auto",
-                    isAiCopied 
-                      ? "bg-emerald-600 border-emerald-500 text-white shadow-[0_0_15px_rgba(5,150,105,0.5)]" 
-                      : "bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border-zinc-700"
-                  )}
-                >
-                  <span>{isAiCopied ? '✅ COPIED! NOW PASTE (CTRL+V) IN CHATGPT' : '✨ ASK AI (CHATGPT)'}</span>
-                  {!isAiCopied && <TooltipHelp text="We generate an optimized analysis prompt loaded with your CSV data and save it to your clipboard. Due to strict browser security sandboxing, you must manually paste it (Ctrl+V) when ChatGPT opens." />}
-                </button>
-                <button
-                  onClick={() => {
-                    const csvContent = "data:text/csv;charset=utf-8,"
-                      + "Title,Published Date,Views,Outlier Score,Engagement %,URL\n"
-                      + sortedVideos.map(v => `"${v.title.replace(/"/g, '""')}","${formatDate(v.publishedAt)}",${v.viewCount},${(v.viewCount / medianViews).toFixed(2)}x,${v.engagementRate?.toFixed(2) || 0},"https://youtube.com/watch?v=${v.id}"`).join("\n");
-                    const encodedUri = encodeURI(csvContent);
-                    const link = document.createElement("a");
-                    link.setAttribute("href", encodedUri);
-                    link.setAttribute("download", `${channel.title.replace(/\s+/g, '_')}_competitor_analysis.csv`);
-                    document.body.appendChild(link);
-                    link.click();
-                    link.remove();
-                  }}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold tracking-widest rounded-full transition-colors shadow-lg"
-                >
-                  EXPORT CSV
-                </button>
-              </div>
+            </div>
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <button
+                onClick={() => {
+                  const csvRows = sortedVideos.map(v => `"${v.title.replace(/"/g, '""')}","${formatDate(v.publishedAt)}",${v.viewCount},${(v.viewCount / medianViews).toFixed(2)}x,${v.engagementRate?.toFixed(2) || 0},"https://youtube.com/watch?v=${v.id}"`).join("\n");
+                  const prompt = `Act as an expert YouTube strategist. Give me detailed insights on this channel based on my analytics data. Look for trends, specify what causes their viral outliers, identify brilliant formats and highlight any content gaps.\n\nHere is the raw data:\nTitle,Published Date,Views,Outlier Score,Engagement %,URL\n${csvRows}`;
+                  
+                  navigator.clipboard.writeText(prompt).then(() => {
+                    setIsAiCopied(true);
+                    setTimeout(() => setIsAiCopied(false), 5000);
+                    window.open('https://chatgpt.com', '_blank');
+                  });
+                }}
+                disabled={isAiCopied}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-4 py-2 text-[10px] sm:text-xs font-bold tracking-widest rounded-md transition-all border w-full sm:w-auto cursor-pointer",
+                  isAiCopied 
+                    ? "bg-white text-black border-transparent" 
+                    : "bg-white hover:bg-zinc-200 text-black border-transparent"
+                )}
+              >
+                <span>{isAiCopied ? '✅ NOW PASTE (CTRL+V) IN CHATGPT' : 'ASK AI (CHATGPT)'}</span>
+                {!isAiCopied && <TooltipHelp text="We generate an optimized analysis prompt loaded with your CSV data and save it to your clipboard. Due to strict browser security sandboxing, you must manually paste it (Ctrl+V) when ChatGPT opens." />}
+              </button>
+              <button
+                onClick={() => {
+                  const csvContent = "data:text/csv;charset=utf-8,"
+                    + "Title,Published Date,Views,Outlier Score,Engagement %,URL\n"
+                    + sortedVideos.map(v => `"${v.title.replace(/"/g, '""')}","${formatDate(v.publishedAt)}",${v.viewCount},${(v.viewCount / medianViews).toFixed(2)}x,${v.engagementRate?.toFixed(2) || 0},"https://youtube.com/watch?v=${v.id}"`).join("\n");
+                  const encodedUri = encodeURI(csvContent);
+                  const link = document.createElement("a");
+                  link.setAttribute("href", encodedUri);
+                  link.setAttribute("download", `${channel.title.replace(/\s+/g, '_')}_channel_analysis.csv`);
+                  document.body.appendChild(link);
+                  link.click();
+                  link.remove();
+                }}
+                className="px-5 py-2 bg-stone-800 hover:bg-stone-700 text-white text-[10px] font-bold tracking-widest rounded-md transition-colors border border-stone-700 cursor-pointer"
+              >
+                EXPORT CSV
+              </button>
             </div>
           </div>
         )}
@@ -248,19 +253,16 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
             const viewersPerEngagement = totalEngagements > 0 ? Math.round(video.viewCount / totalEngagements) : 0
             const engagementBadge = viewersPerEngagement > 0 ? `1 IN ${viewersPerEngagement}` : 'NO'
 
-            // Outlier Engine Calculation
             const outlierMultiplier = parseFloat((video.viewCount / Math.max(medianViews, 1)).toFixed(1))
-            const isOutlier = outlierMultiplier >= 1.5 // Anything performing 1.5x better than median is flagged
+            const isOutlier = outlierMultiplier >= 1.5
 
             return (
-              <a href={`https://youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" key={video.id} className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl overflow-hidden hover:border-blue-500/50 hover:bg-zinc-800/40 transition-all duration-300 group shadow-lg drop-shadow-sm flex flex-col relative">
-
+              <a href={`https://youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" key={video.id} className="bg-[#0A0A0A] border border-zinc-800 rounded-xl overflow-hidden hover:border-zinc-600 transition-all duration-300 group flex flex-col relative">
                 <div className="relative aspect-video overflow-hidden">
-                  <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
+                  <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out grayscale-[0.2] group-hover:grayscale-0" />
 
-                  {/* Outlier Engine Badge */}
                   {isOutlier && (
-                    <div className="absolute top-3 left-3 bg-red-600 text-white pl-3 pr-2 py-1.5 text-[10px] font-bold rounded-full shadow-xl border border-red-400/50 z-20 flex items-center gap-1 uppercase tracking-widest cursor-default">
+                    <div className="absolute top-3 left-3 bg-red-900/80 text-white pl-3 pr-2 py-1 text-[10px] font-bold rounded shadow-sm border border-red-900/50 z-20 flex items-center justify-center gap-1 uppercase tracking-widest cursor-default backdrop-blur-md">
                       <span>OUTLIER {outlierMultiplier}x</span>
                       <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
                         <TooltipHelp text={`This video massively overperformed the channel's mathematical baseline (${outlierMultiplier}x). Try analyzing its thumbnail layout and core topic selection.`} down />
@@ -269,18 +271,18 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
                   )}
 
                   {/* Engagement Badge */}
-                  <div className="absolute top-3 right-3 bg-blue-600 text-white px-3 py-1.5 text-[10px] font-bold rounded-full shadow-xl border border-blue-400/50 z-20 flex items-center gap-1.5 uppercase tracking-widest pointer-events-none">
+                  <div className="absolute top-3 right-3 bg-blue-900/80 text-white px-3 py-1 text-[10px] font-bold rounded shadow-sm border border-blue-900/50 z-20 flex items-center justify-center gap-1.5 uppercase tracking-widest pointer-events-none backdrop-blur-md">
                     {engagementBadge} <span className="text-[8px] font-bold opacity-80 mt-px">ENGAGED</span>
                   </div>
 
-                  <div className="absolute bottom-3 right-3 bg-black/90 text-white px-2 py-1 text-[10px] font-bold tracking-widest rounded uppercase z-20 pointer-events-none">
+                  <div className="absolute bottom-3 right-3 bg-zinc-900/90 text-white px-2 py-1 text-[10px] font-bold tracking-widest rounded uppercase z-20 pointer-events-none border border-zinc-700/50">
                     {formatDate(video.publishedAt)}
                   </div>
                 </div>
 
                 <div className="p-5 flex-1 flex flex-col">
                   <h3 className="text-zinc-100 font-bold text-[15px] mb-4 line-clamp-2 leading-snug group-hover:text-blue-400 transition-colors">{video.title}</h3>
-                  <div className="grid grid-cols-3 gap-2 mt-auto pt-4 border-t border-zinc-800/80">
+                  <div className="grid grid-cols-3 gap-2 mt-auto pt-4 border-t border-stone-800/80">
                     <div className="flex flex-col" title="Normalizes total view count by the number of days since it was published">
                       <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Views/Day</span>
                       <span className="text-zinc-100 font-bold text-sm tracking-tight">{formatNumber(viewsPerDay)}</span>
@@ -302,19 +304,19 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
 
         {/* Pagination Console */}
         {sortedVideos.length > PAGE_SIZE && (
-          <div className="flex justify-between items-center mt-6 px-6 py-4 bg-zinc-900/50 border border-zinc-800 rounded-2xl backdrop-blur-xl mb-12">
+          <div className="flex justify-between items-center mt-6 px-6 py-4 bg-[#0A0A0A] border border-zinc-800 rounded-xl mb-12">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-colors"
+              className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors border border-stone-800 cursor-pointer"
             >
               Previous
             </button>
-            <span className="text-zinc-400 text-[10px] font-bold tracking-widest uppercase">Page {currentPage} of {Math.ceil(sortedVideos.length / PAGE_SIZE)}</span>
+            <span className="text-stone-500 text-[10px] font-bold tracking-widest uppercase">Page {currentPage} of {Math.ceil(sortedVideos.length / PAGE_SIZE)}</span>
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(sortedVideos.length / PAGE_SIZE)))}
               disabled={currentPage === Math.ceil(sortedVideos.length / PAGE_SIZE)}
-              className="px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold uppercase tracking-widest rounded-xl transition-colors"
+              className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors border border-stone-800 cursor-pointer"
             >
               Next
             </button>

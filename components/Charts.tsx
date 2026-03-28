@@ -72,14 +72,14 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
       {/* 1. Channel Health Trend (Multi-Metric Composed Chart) */}
-      <div className="w-full h-[450px] bg-zinc-900/50 border border-zinc-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl flex flex-col pt-6 group transition-all duration-500 relative">
+      <div className="w-full h-[450px] bg-[#0A0A0A] border border-zinc-800 p-6 rounded-xl flex flex-col pt-6 group transition-all duration-500 relative">
         <div className="flex flex-wrap justify-between items-center mb-6 gap-4 shrink-0 px-2">
           <div>
             <h3 className="text-zinc-500 font-bold tracking-widest text-xs uppercase mb-1 flex items-center gap-2">
                Channel Health Trend
                <div className="group/cht relative inline-flex cursor-help align-middle">
-                 <div className="w-3.5 h-3.5 rounded-full border border-zinc-500/50 text-zinc-400 flex items-center justify-center text-[9px] font-bold hover:bg-white hover:text-zinc-900 transition-colors bg-zinc-800/80">?</div>
-                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-56 p-3 bg-zinc-800 border border-zinc-600 rounded-xl text-zinc-200 text-[10px] leading-relaxed shadow-2xl opacity-0 invisible group-hover/cht:opacity-100 group-hover/cht:visible transition-all duration-200 z-50 normal-case tracking-normal font-medium pointer-events-none drop-shadow-2xl text-center">
+                 <div className="w-3.5 h-3.5 rounded-sm border border-zinc-700 text-zinc-400 flex items-center justify-center text-[9px] font-bold hover:bg-white hover:text-black transition-colors bg-zinc-900">?</div>
+                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 p-3 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-200 text-[10px] leading-relaxed shadow-md opacity-0 invisible group-hover/cht:opacity-100 group-hover/cht:visible transition-all duration-200 z-50 normal-case tracking-normal font-medium pointer-events-none text-center">
                    Shows if the channel is actually growing or dying. The orange line smooths out random viral spikes so you can see the true long-term trend.
                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-b-zinc-600"></div>
                  </div>
@@ -87,14 +87,14 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
             </h3>
             <p className="text-zinc-600 text-[10px] font-medium tracking-wide">Historical algorithmic trajectories</p>
           </div>
-          <div className="flex items-center bg-black/40 border border-zinc-800 p-1 rounded-full shadow-inner max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex items-center bg-transparent border border-zinc-800 p-1 rounded-md shadow-inner max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {(['views', 'likes', 'comments', 'engagementRate'] as MetricType[]).map((metric, i, arr) => (
               <button
                 key={metric}
                 onClick={() => setActiveMetric(metric)}
                 className={cn(
-                  "px-4 py-1.5 rounded-full text-[9px] font-bold tracking-widest uppercase transition-colors shrink-0",
-                  activeMetric === metric ? "bg-zinc-700 text-white shadow" : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30",
+                  "px-4 py-1.5 rounded-sm text-[9px] font-bold tracking-widest uppercase transition-colors shrink-0 cursor-pointer",
+                  activeMetric === metric ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30",
                   i === arr.length - 1 && "mr-1" // prevents right-edge clip
                 )}
               >
@@ -140,7 +140,7 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
                   if (active && payload && payload.length) {
                     const data = payload[0].payload
                     return (
-                      <div className="bg-zinc-800/95 backdrop-blur-md border border-zinc-700/80 p-3.5 rounded-xl shadow-2xl pointer-events-none min-w-[220px] max-w-[280px]">
+                      <div className="bg-[#0A0A0A] border border-zinc-800 p-3.5 rounded-md shadow-lg pointer-events-none min-w-[220px] max-w-[280px]">
                         <p className="text-white font-bold text-xs mb-1 truncate">{data.fullTitle}</p>
                         <p className="text-zinc-400 text-[9px] mb-3 font-bold tracking-widest uppercase">{data.date}</p>
                         
@@ -192,16 +192,15 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
       </div>
 
       {/* 2. Views vs Likes Ratio (Scatter Plot) */}
-      <div className="w-full h-[450px] bg-zinc-900/50 border border-zinc-800 p-6 rounded-3xl shadow-xl backdrop-blur-xl flex flex-col relative overflow-hidden group pt-6 transition-all duration-500">
-        <div className="absolute inset-0 bg-blue-500/5 blur-[100px] pointer-events-none transition-opacity duration-700 opacity-50 xl:group-hover:opacity-100" />
+      <div className="w-full h-[450px] bg-[#0A0A0A] border border-zinc-800 p-6 rounded-xl flex flex-col relative group pt-6 transition-all duration-500">
         
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4 shrink-0 px-2 relative z-10">
           <div>
-            <h3 className="text-zinc-400 font-bold tracking-widest text-xs uppercase mb-1 flex items-center gap-2">
+            <h3 className="text-zinc-500 font-bold tracking-widest text-xs uppercase mb-1 flex items-center gap-2">
               Views vs Likes Matrix
               <div className="group/mx relative inline-flex cursor-help align-middle">
-                 <div className="w-3.5 h-3.5 rounded-full border border-zinc-500/50 text-zinc-400 flex items-center justify-center text-[9px] font-bold hover:bg-white hover:text-zinc-900 transition-colors bg-zinc-800/80">?</div>
-                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-56 p-3 bg-zinc-800 border border-zinc-600 rounded-xl text-zinc-200 text-[10px] leading-relaxed shadow-2xl opacity-0 invisible group-hover/mx:opacity-100 group-hover/mx:visible transition-all duration-200 z-50 normal-case tracking-normal font-medium pointer-events-none drop-shadow-2xl text-center">
+                 <div className="w-3.5 h-3.5 rounded-sm border border-zinc-700 text-zinc-400 flex items-center justify-center text-[9px] font-bold hover:bg-white hover:text-black transition-colors bg-zinc-900">?</div>
+                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 p-3 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-200 text-[10px] leading-relaxed shadow-md opacity-0 invisible group-hover/mx:opacity-100 group-hover/mx:visible transition-all duration-200 z-50 normal-case tracking-normal font-medium pointer-events-none text-center">
                    Groups videos by their traits. Top-right (Blue) are massive viral hits. Bottom-right (Red) are videos that got lots of views but nobody interacted with them (Clickbait).
                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-b-zinc-600"></div>
                  </div>
@@ -262,7 +261,7 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
                     else if (data.views < avgViews && data.likes >= avgLikes) { category = 'Underrated'; labelColor = 'text-orange-400' }
 
                     return (
-                      <div className="bg-zinc-800/95 backdrop-blur-md border border-zinc-700/80 p-3.5 rounded-xl shadow-2xl pointer-events-none min-w-[200px] max-w-[260px]">
+                      <div className="bg-[#0A0A0A] border border-zinc-800 p-3.5 rounded-md shadow-lg pointer-events-none min-w-[200px] max-w-[260px]">
                         <p className="text-white font-bold text-xs mb-1 truncate">{data.name}</p>
                         <p className="text-zinc-400 text-[9px] mb-3 font-bold uppercase tracking-widest">{data.date}</p>
                         <div className="flex flex-col gap-1.5 border-t border-zinc-700/80 pt-2.5">
