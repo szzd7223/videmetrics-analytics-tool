@@ -61,15 +61,5 @@ npm run dev
 
 ---
 
-## Deployment
 
-This app is optimized for Vercel. 
-
-1. Push the code to GitHub.
-2. Connect the repository to Vercel.
-3. Add the 3 environment variables from the .env.local to the Vercel project settings.
-4. **Deploy.**
-
----
-
-**Developed with Brutalist focus on data clarity in 2026.**
+**Developed with focus on data clarity in 2026.**
