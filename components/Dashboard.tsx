@@ -13,7 +13,7 @@ const TooltipHelp = ({ text, down = false }: { text: string, down?: boolean }) =
   )
   
   return (
-    <div className="group/tooltip relative inline-flex cursor-help align-middle ml-1">
+    <div className="group/tooltip relative hidden sm:inline-flex cursor-help align-middle ml-1">
       <div className="w-3.5 h-3.5 rounded-sm border border-zinc-700 text-zinc-500 flex items-center justify-center text-[10px] font-bold hover:bg-white hover:text-black transition-colors">?</div>
       <div className={tooltipClasses}>
         {text}
@@ -119,15 +119,15 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
   }, [filteredVideos])
 
   return (
-    <div className="w-full max-w-6xl mx-auto mt-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 fade-in pb-20">
+    <div className="w-full max-w-6xl mx-auto mt-6 sm:mt-12 space-y-5 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 fade-in pb-20 px-1 sm:px-0">
 
       {/* 1. Global Time Filter Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#0A0A0A] border border-zinc-800 p-3 pl-6 rounded-xl">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 bg-[#0A0A0A] border border-zinc-800 p-3 sm:pl-6 rounded-xl">
         <h2 className="text-zinc-500 font-bold text-xs uppercase tracking-widest flex items-center">
           Global Analysis Horizon
           <TooltipHelp text="Select a data cohort to instantly recalculate all median baselines, outlier scores, and historical trajectories strictly based on those recency blocks." />
         </h2>
-        <div className="flex bg-black/50 border border-zinc-800 p-1.5 rounded-lg gap-1 shadow-inner overflow-x-auto w-full xl:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex bg-black/50 border border-zinc-800 p-1 rounded-lg gap-1 shadow-inner overflow-x-auto w-full sm:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {[
             { id: '15', label: 'LAST 15 VIDEOS', sub: 'Short-term trend' },
             { id: '50', label: 'LAST 50 VIDEOS', sub: 'Mid-term trend' },
@@ -144,8 +144,8 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
                   : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/50"
               )}
             >
-              <span className="text-[11px] sm:text-xs font-bold tracking-widest uppercase">{tf.label}</span>
-              <span className="text-[10px] sm:text-[11px] opacity-70 tracking-wide font-medium mt-0.5">{tf.sub}</span>
+              <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase whitespace-nowrap">{tf.label}</span>
+              <span className="text-[9px] sm:text-[11px] opacity-70 tracking-wide font-medium mt-0.5 whitespace-nowrap">{tf.sub}</span>
             </button>
           ))}
         </div>
@@ -156,14 +156,14 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
         href={`https://youtube.com/channel/${channel.id}`} 
         target="_blank" 
         rel="noopener noreferrer"
-        className="grid grid-cols-1 lg:grid-cols-5 gap-8 bg-[#0A0A0A] border border-zinc-800 p-8 rounded-xl hover:border-zinc-700 transition-all duration-300 group cursor-pointer"
+        className="grid grid-cols-1 lg:grid-cols-5 gap-5 sm:gap-8 bg-[#0A0A0A] border border-zinc-800 p-4 sm:p-8 rounded-xl hover:border-zinc-700 transition-all duration-300 group cursor-pointer"
       >
         {/* Left: Bio Info */}
-        <div className="lg:col-span-3 flex flex-col md:flex-row items-center lg:items-start gap-6">
-          <img src={channel.thumbnailUrl} alt={channel.title} className="w-24 h-24 md:w-32 md:h-32 rounded-lg border border-zinc-800 group-hover:border-zinc-600 transition-colors shrink-0" />
-          <div className="flex-1 text-center md:text-left">
-            <h1 className="text-3xl font-black tracking-tighter text-white uppercase mb-2 group-hover:text-blue-400 transition-colors leading-none">{channel.title}</h1>
-            <p className="text-zinc-400 mb-0 max-w-2xl font-medium leading-relaxed line-clamp-2 text-sm">{channel.description || 'No channel description available.'}</p>
+        <div className="lg:col-span-3 flex flex-col sm:flex-row items-center lg:items-start gap-4 sm:gap-6">
+          <img src={channel.thumbnailUrl} alt={channel.title} className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-lg border border-zinc-800 group-hover:border-zinc-600 transition-colors shrink-0" />
+          <div className="flex-1 text-center sm:text-left min-w-0">
+            <h1 className="text-xl sm:text-3xl font-black tracking-tighter text-white uppercase mb-2 group-hover:text-blue-400 transition-colors leading-none">{channel.title}</h1>
+            <p className="text-zinc-400 mb-0 max-w-2xl font-medium leading-relaxed line-clamp-2 text-xs sm:text-sm">{channel.description || 'No channel description available.'}</p>
           </div>
         </div>
 
@@ -204,56 +204,56 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
       </a>
 
       {/* 3. Insight Cards Row (Expanded Strategic Metrics) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {/* Metric 1: Viral Hit Rate */}
-        <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
-          <span className="text-[10px] text-white font-bold uppercase tracking-widest mb-2 flex flex-col sm:flex-row items-center w-full justify-center md:justify-start gap-1 text-center md:text-left">
+        <div className="bg-[#0A0A0A] border border-zinc-800 p-3 sm:p-5 rounded-xl flex flex-col justify-between items-center sm:items-start group hover:border-zinc-600 transition-colors h-full">
+          <span className="text-[9px] sm:text-[10px] text-white font-bold uppercase tracking-widest mb-2 flex items-center w-full justify-center sm:justify-start gap-1 text-center sm:text-left">
             <span>Viral Hit Rate</span>
             <TooltipHelp text="The % of your videos that reached at least 1.5x of your usual baseline. This measures creative reliability." />
           </span>
-          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">
+          <span className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-none mt-auto">
             {viralHitRate.toFixed(1)}%
           </span>
         </div>
 
         {/* Metric 2: Median Views */}
-        <div className="bg-[#0A0A0A] border border-white/10 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-white/30 transition-colors overflow-visible h-full">
-          <span className="text-[10px] text-white font-bold uppercase tracking-widest mb-2 flex flex-col sm:flex-row items-center w-full justify-center md:justify-start gap-1 text-center md:text-left">
+        <div className="bg-[#0A0A0A] border border-white/10 p-3 sm:p-5 rounded-xl flex flex-col justify-between items-center sm:items-start group hover:border-white/30 transition-colors overflow-visible h-full">
+          <span className="text-[9px] sm:text-[10px] text-white font-bold uppercase tracking-widest mb-2 flex items-center w-full justify-center sm:justify-start gap-1 text-center sm:text-left">
             <span>Median Views</span>
             <TooltipHelp text="The typical views for a video. We use Median instead of Average so rare viral hits don't skew the baseline." />
           </span>
-          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">
+          <span className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-none mt-auto">
             {filteredVideos.length === 0 ? '0' : formatNumber(medianViews)}
           </span>
         </div>
 
         {/* Metric 3: Likes per 100 */}
-        <div className="bg-[#0A0A0A] border border-white/10 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-white/30 transition-colors overflow-visible h-full">
-          <span className="text-[10px] text-zinc-200 font-bold uppercase tracking-widest mb-2 flex flex-col sm:flex-row items-center w-full justify-center md:justify-start gap-1 text-center md:text-left">
+        <div className="bg-[#0A0A0A] border border-white/10 p-3 sm:p-5 rounded-xl flex flex-col justify-between items-center sm:items-start group hover:border-white/30 transition-colors overflow-visible h-full">
+          <span className="text-[9px] sm:text-[10px] text-zinc-200 font-bold uppercase tracking-widest mb-2 flex items-center w-full justify-center sm:justify-start gap-1 text-center sm:text-left">
             <span>Velocity</span>
             <TooltipHelp text="Likes per 100 views. This measures the 'Efficiency of Impression.' High velocity means you are hitting the right audience." />
           </span>
-          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">
+          <span className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-none mt-auto">
             {engagementVelocity.toFixed(1)} <span className="text-[10px] opacity-40">/100</span>
           </span>
         </div>
 
         {/* Metric 4: Avg. Engagement */}
-        <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Engagement</span>
-          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{avgEngRate.toFixed(2)}%</span>
+        <div className="bg-[#0A0A0A] border border-zinc-800 p-3 sm:p-5 rounded-xl flex flex-col justify-between items-center sm:items-start group hover:border-zinc-600 transition-colors h-full">
+          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center sm:text-left">Engagement</span>
+          <span className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-none mt-auto">{avgEngRate.toFixed(2)}%</span>
         </div>
 
         {/* Metric 5: Avg. Likes */}
-        <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Avg. Likes</span>
-          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(avgLikes)}</span>
+        <div className="bg-[#0A0A0A] border border-zinc-800 p-3 sm:p-5 rounded-xl flex flex-col justify-between items-center sm:items-start group hover:border-zinc-600 transition-colors h-full">
+          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center sm:text-left">Avg. Likes</span>
+          <span className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(avgLikes)}</span>
         </div>
 
         {/* Metric 6: Avg. Comments */}
-        <div className="bg-[#0A0A0A] border border-zinc-800 p-5 rounded-xl flex flex-col justify-between items-center md:items-start group hover:border-zinc-600 transition-colors h-full">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center md:text-left">Avg. Comments</span>
-          <span className="text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(avgComments)}</span>
+        <div className="bg-[#0A0A0A] border border-zinc-800 p-3 sm:p-5 rounded-xl flex flex-col justify-between items-center sm:items-start group hover:border-zinc-600 transition-colors h-full">
+          <span className="text-[9px] sm:text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2 text-center sm:text-left">Avg. Comments</span>
+          <span className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-none mt-auto">{formatNumber(avgComments)}</span>
         </div>
       </div>
 
@@ -271,15 +271,15 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
       {/* 5. Video Table/Grid with Filters */}
       <div className="space-y-6 pt-4">
         {filteredVideos.length > 0 && (
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-[#0A0A0A] p-4 border border-zinc-800 rounded-xl">
-            <div className="flex items-center gap-4">
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Video Library</span>
-              <div className="flex bg-zinc-900 border border-zinc-800 p-1 rounded-lg gap-1">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 sm:gap-4 bg-[#0A0A0A] p-3 sm:p-4 border border-zinc-800 rounded-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest shrink-0">Video Library</span>
+              <div className="flex bg-zinc-900 border border-zinc-800 p-1 rounded-lg gap-1 overflow-x-auto w-full sm:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {['date', 'engagement', 'outlier'].map((type) => (
                   <button
                     key={type}
                     onClick={() => handleSort(type as any)}
-                    className={cn("px-4 py-1.5 rounded-md text-xs font-semibold tracking-wide transition-colors cursor-pointer", sortBy === type ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-200")}
+                    className={cn("px-3 sm:px-4 py-1.5 rounded-md text-[10px] sm:text-xs font-semibold tracking-wide transition-colors cursor-pointer shrink-0", sortBy === type ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-200")}
                   >
                     {type === 'date' ? 'NEWEST' : 
                      type === 'views' ? 'MOST VIEWED' : 
@@ -289,16 +289,41 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
                 ))}
               </div>
             </div>
-            <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
               <button
                 onClick={() => {
                   const csvRows = sortedVideos.map(v => `"${v.title.replace(/"/g, '""')}","${formatDate(v.publishedAt)}",${v.viewCount},${(v.viewCount / medianViews).toFixed(2)}x,${v.engagementRate?.toFixed(2) || 0},"https://youtube.com/watch?v=${v.id}"`).join("\n");
                   const prompt = `Act as an expert YouTube strategist. Give me detailed insights on this channel based on my analytics data. Look for trends, specify what causes their viral outliers, identify brilliant formats and highlight any content gaps.\n\nHere is the raw data:\nTitle,Published Date,Views,Outlier Score,Engagement %,URL\n${csvRows}`;
                   
-                  navigator.clipboard.writeText(prompt).then(() => {
+                  const copyToClipboard = (text: string) => {
+                    if (navigator.clipboard && window.isSecureContext) {
+                      return navigator.clipboard.writeText(text);
+                    }
+                    // Fallback for non-secure contexts (HTTP on mobile)
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.style.position = 'fixed';
+                    textarea.style.left = '-9999px';
+                    textarea.style.top = '-9999px';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    try {
+                      document.execCommand('copy');
+                    } catch (err) {
+                      console.error('Copy failed', err);
+                    }
+                    document.body.removeChild(textarea);
+                    return Promise.resolve();
+                  };
+
+                  copyToClipboard(prompt).then(() => {
                     setIsAiCopied(true);
                     setTimeout(() => setIsAiCopied(false), 5000);
-                    window.open('https://chatgpt.com', '_blank');
+                    const isMobile = window.innerWidth < 640;
+                    if (!isMobile) {
+                      setTimeout(() => window.open('https://chatgpt.com', '_blank'), 1500);
+                    }
                   });
                 }}
                 disabled={isAiCopied}
@@ -309,7 +334,8 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
                     : "bg-white hover:bg-zinc-200 text-black border-transparent"
                 )}
               >
-                <span>{isAiCopied ? '✅ NOW PASTE (CTRL+V) IN CHATGPT' : 'ASK AI (CHATGPT)'}</span>
+                <span className="sm:hidden">{isAiCopied ? '✅ PROMPT COPIED — PASTE IN ANY AI CHATBOT' : 'ASK AI'}</span>
+                <span className="hidden sm:inline">{isAiCopied ? '✅ NOW PASTE (CTRL+V) IN CHATGPT' : 'ASK AI (CHATGPT)'}</span>
                 {!isAiCopied && <TooltipHelp text="We generate an optimized analysis prompt loaded with your CSV data and save it to your clipboard. Due to strict browser security sandboxing, you must manually paste it (Ctrl+V) when ChatGPT opens." />}
               </button>
               <button
@@ -383,17 +409,17 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
                       <div className="grid grid-cols-3 gap-2 mt-auto pt-4 border-t border-stone-800/80">
                         <div className="flex flex-col" title="Normalizes total view count by the number of days since it was published">
                           <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Views/Day</span>
-                          <span className="text-zinc-100 font-bold text-sm tracking-tight">{formatNumber(viewsPerDay)}</span>
+                          <span className="text-zinc-100 font-bold text-[13px] sm:text-sm tracking-tight">{formatNumber(viewsPerDay)}</span>
                         </div>
                         <div className="flex flex-col" title={`Likes: ${formatNumber(video.likeCount)} | Comments: ${formatNumber(video.commentCount)}`}>
                           <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1 cursor-help">Engagement</span>
-                          <span className="text-orange-400 font-bold text-sm tracking-tight cursor-help tabular-nums">
+                          <span className="text-orange-400 font-bold text-[13px] sm:text-sm tracking-tight cursor-help tabular-nums">
                             {formatNumber(totalEngagements)}
                           </span>
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Total Views</span>
-                          <span className="text-blue-400 font-bold text-sm tracking-tight">{formatNumber(video.viewCount)}</span>
+                          <span className="text-blue-400 font-bold text-[13px] sm:text-sm tracking-tight">{formatNumber(video.viewCount)}</span>
                         </div>
                       </div>
                     </div>
@@ -406,23 +432,23 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
 
         {/* Pagination Console with Tactile Feedback */}
         {sortedVideos.length > PAGE_SIZE && (
-          <div className="flex justify-between items-center mt-6 px-6 py-4 bg-[#0A0A0A] border border-zinc-800 rounded-xl mb-12">
+          <div className="flex justify-between items-center mt-6 px-3 sm:px-6 py-3 sm:py-4 bg-[#0A0A0A] border border-zinc-800 rounded-xl mb-12">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors border border-zinc-800 cursor-pointer"
+              className="px-3 sm:px-5 py-2 sm:py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors border border-zinc-800 cursor-pointer"
             >
               Previous
             </motion.button>
-            <span className="text-zinc-500 text-[10px] font-bold tracking-widest uppercase">Page {currentPage} of {Math.ceil(sortedVideos.length / PAGE_SIZE)}</span>
+            <span className="text-zinc-500 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">Page {currentPage} of {Math.ceil(sortedVideos.length / PAGE_SIZE)}</span>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, Math.ceil(sortedVideos.length / PAGE_SIZE)))}
               disabled={currentPage === Math.ceil(sortedVideos.length / PAGE_SIZE)}
-              className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors border border-zinc-800 cursor-pointer"
+              className="px-3 sm:px-5 py-2 sm:py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-widest rounded-md transition-colors border border-zinc-800 cursor-pointer"
             >
               Next
             </motion.button>

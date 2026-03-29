@@ -36,8 +36,8 @@ export default function Home() {
       {/* Crisp Geometric Grid Overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181b33_1px,transparent_1px),linear-gradient(to_bottom,#18181b33_1px,transparent_1px)] bg-size-[48px_48px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0"></div>
       
-      <div className="container mx-auto px-6 py-12 relative z-10 w-full max-w-7xl">
-        <div className="text-center max-w-3xl mx-auto mb-12 pt-4 md:pt-8 relative">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 relative z-10 w-full max-w-7xl">
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12 pt-2 md:pt-8 relative">
           <div className="flex justify-center items-center gap-4 mb-10 animate-in fade-in zoom-in-95 duration-1000 ease-out">
             <div className="flex items-end gap-1 px-1.5 py-1 border border-zinc-800 rounded-sm">
               <div className="w-1 h-2 bg-zinc-700" />
@@ -48,11 +48,11 @@ export default function Home() {
             <span className="text-2xl font-black tracking-tighter text-white uppercase italic">VidMetrics</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-white pb-2 leading-tight animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150 fill-mode-both">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-extrabold tracking-tight mb-4 sm:mb-6 text-white pb-2 leading-tight animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150 fill-mode-both">
             Actionable insights for <br className="hidden md:block"/> YouTube channels.
           </h1>
           
-          <p className="text-xl text-zinc-400 mb-12 max-w-2xl mx-auto font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both">
+          <p className="text-base sm:text-xl text-zinc-400 mb-8 sm:mb-12 max-w-2xl mx-auto font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both px-2 sm:px-0">
             Instantly surface performance outliers and engagement trends so you can focus on executing strategy instead of crunching data.
           </p>
           

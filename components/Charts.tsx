@@ -70,14 +70,14 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
   const avgLikes = matrixData.length > 0 ? matrixData.reduce((sum, v) => sum + v.likes, 0) / matrixData.length : 0
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 w-full">
       {/* 1. Channel Health Trend (Multi-Metric Composed Chart) */}
-      <div className="w-full h-[450px] bg-[#0A0A0A] border border-zinc-800 p-6 rounded-xl flex flex-col pt-6 group transition-all duration-500 relative">
-        <div className="flex flex-wrap justify-between items-center mb-6 gap-4 shrink-0 px-2">
-          <div>
-            <h3 className="text-zinc-500 font-bold tracking-widest text-xs uppercase mb-1 flex items-center gap-2">
+      <div className="w-full h-[320px] sm:h-[400px] lg:h-[450px] bg-[#0A0A0A] border border-zinc-800 p-3 sm:p-6 rounded-xl flex flex-col pt-4 sm:pt-6 group transition-all duration-500 relative">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-4 shrink-0 px-1 sm:px-2">
+          <div className="w-full sm:w-auto text-center sm:text-left">
+            <h3 className="text-zinc-500 font-bold tracking-widest text-[10px] sm:text-xs uppercase mb-1 flex items-center justify-center sm:justify-start gap-2">
                Channel Health Trend
-               <div className="group/cht relative inline-flex cursor-help align-middle">
+               <div className="group/cht relative hidden sm:inline-flex cursor-help align-middle">
                  <div className="w-3.5 h-3.5 rounded-sm border border-zinc-700 text-zinc-400 flex items-center justify-center text-[9px] font-bold hover:bg-white hover:text-black transition-colors bg-zinc-900">?</div>
                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 p-3 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-200 text-[10px] leading-relaxed shadow-md opacity-0 invisible group-hover/cht:opacity-100 group-hover/cht:visible transition-all duration-200 z-50 normal-case tracking-normal font-medium pointer-events-none text-center">
                    Shows if the channel is actually growing or dying. The orange line smooths out random viral spikes so you can see the true long-term trend.
@@ -87,13 +87,13 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
             </h3>
             <p className="text-zinc-600 text-[10px] font-medium tracking-wide">Historical algorithmic trajectories</p>
           </div>
-          <div className="flex items-center bg-transparent border border-zinc-800 p-1 rounded-md shadow-inner max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex items-center bg-transparent border border-zinc-800 p-1 rounded-md shadow-inner max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-full sm:w-auto">
             {(['views', 'likes', 'comments', 'engagementRate'] as MetricType[]).map((metric, i, arr) => (
               <button
                 key={metric}
                 onClick={() => setActiveMetric(metric)}
                 className={cn(
-                  "px-4 py-1.5 rounded-sm text-[9px] font-bold tracking-widest uppercase transition-colors shrink-0 cursor-pointer",
+                  "px-3 sm:px-4 py-1.5 rounded-sm text-[8px] sm:text-[9px] font-bold tracking-widest uppercase transition-colors shrink-0 cursor-pointer",
                   activeMetric === metric ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30",
                   i === arr.length - 1 && "mr-1" // prevents right-edge clip
                 )}
@@ -104,7 +104,7 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
           </div>
         </div>
 
-        <div className="flex-1 w-full min-h-0 pl-2 pb-2 select-none relative z-10">
+        <div className="flex-1 w-full min-h-0 pl-0 sm:pl-2 pb-2 select-none relative z-10 pointer-events-none sm:pointer-events-auto">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart 
               data={trendData} 
@@ -192,13 +192,13 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
       </div>
 
       {/* 2. Views vs Likes Ratio (Scatter Plot) */}
-      <div className="w-full h-[450px] bg-[#0A0A0A] border border-zinc-800 p-6 rounded-xl flex flex-col relative group pt-6 transition-all duration-500">
+      <div className="w-full h-[320px] sm:h-[400px] lg:h-[450px] bg-[#0A0A0A] border border-zinc-800 p-3 sm:p-6 rounded-xl flex flex-col relative group pt-4 sm:pt-6 transition-all duration-500">
         
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-6 gap-4 shrink-0 px-2 relative z-10">
-          <div>
-            <h3 className="text-zinc-500 font-bold tracking-widest text-xs uppercase mb-1 flex items-center gap-2">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-4 sm:mb-6 gap-3 sm:gap-4 shrink-0 px-1 sm:px-2 relative z-10">
+          <div className="w-full xl:w-auto text-center xl:text-left">
+            <h3 className="text-zinc-500 font-bold tracking-widest text-[10px] sm:text-xs uppercase mb-1 flex items-center justify-center xl:justify-start gap-2">
               Views vs Likes Matrix
-              <div className="group/mx relative inline-flex cursor-help align-middle">
+              <div className="group/mx relative hidden sm:inline-flex cursor-help align-middle">
                  <div className="w-3.5 h-3.5 rounded-sm border border-zinc-700 text-zinc-400 flex items-center justify-center text-[9px] font-bold hover:bg-white hover:text-black transition-colors bg-zinc-900">?</div>
                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 p-3 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-200 text-[10px] leading-relaxed shadow-md opacity-0 invisible group-hover/mx:opacity-100 group-hover/mx:visible transition-all duration-200 z-50 normal-case tracking-normal font-medium pointer-events-none text-center">
                    Groups videos by their traits. Top-right (Blue) are massive viral hits. Bottom-right (Red) are videos that got lots of views but nobody interacted with them (Clickbait).
@@ -208,15 +208,15 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
             </h3>
             <p className="text-zinc-600 text-[10px] font-medium tracking-wide">Categorizing video performance traits</p>
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-2 justify-end">
-             <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div><span className="text-[9px] font-bold tracking-widest uppercase text-zinc-500">Hits</span></div>
-             <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div><span className="text-[9px] font-bold tracking-widest uppercase text-zinc-500">Bait</span></div>
-             <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]"></div><span className="text-[9px] font-bold tracking-widest uppercase text-zinc-500">Underrated</span></div>
-             <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-zinc-500"></div><span className="text-[9px] font-bold tracking-widest uppercase text-zinc-500">Average</span></div>
+          <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-2 justify-center xl:justify-end w-full xl:w-auto">
+             <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div><span className="text-[8px] sm:text-[9px] font-bold tracking-widest uppercase text-zinc-500">Hits</span></div>
+             <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div><span className="text-[8px] sm:text-[9px] font-bold tracking-widest uppercase text-zinc-500">Bait</span></div>
+             <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]"></div><span className="text-[8px] sm:text-[9px] font-bold tracking-widest uppercase text-zinc-500">Underrated</span></div>
+             <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-zinc-500"></div><span className="text-[8px] sm:text-[9px] font-bold tracking-widest uppercase text-zinc-500">Average</span></div>
           </div>
         </div>
 
-        <div className="flex-1 w-full min-h-0 relative z-10 pl-4 pb-2 select-none">
+        <div className="flex-1 w-full min-h-0 relative z-10 pl-1 sm:pl-4 pb-2 select-none pointer-events-none sm:pointer-events-auto">
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart 
               margin={{ top: 20, right: 30, bottom: 20, left: 10 }}
