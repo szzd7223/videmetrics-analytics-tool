@@ -3,7 +3,7 @@
 
 VidMetrics is a tactical analytics dashboard designed to surface the true signal in the noise of YouTube data. Built with a Monochrome Brutalist aesthetic, it skips the vanity metrics and focuses on what actually drives growth: creative reliability, engagement velocity, and algorithmic momentum.
 
-![VidMetrics Logo](app/icon.png)
+
 
 ---
 
