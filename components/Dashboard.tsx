@@ -11,7 +11,7 @@ const TooltipHelp = ({ text, down = false }: { text: string, down?: boolean }) =
     "absolute left-1/2 -translate-x-1/2 w-64 p-3 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-100 text-xs shadow-md opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-300 z-50 normal-case tracking-normal font-medium pointer-events-none text-center leading-relaxed",
     down ? "top-full mt-2" : "bottom-full mb-2"
   )
-  
+
   return (
     <div className="group/tooltip relative hidden sm:inline-flex cursor-help align-middle ml-1">
       <div className="w-3.5 h-3.5 rounded-sm border border-zinc-700 text-zinc-500 flex items-center justify-center text-[10px] font-bold hover:bg-white hover:text-black transition-colors">?</div>
@@ -74,18 +74,18 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
   const totalLikes = useMemo(() => filteredVideos.reduce((acc, v) => acc + (v.likeCount || 0), 0), [filteredVideos])
   const totalComments = useMemo(() => filteredVideos.reduce((acc, v) => acc + (v.commentCount || 0), 0), [filteredVideos])
   const totalEngagement = totalLikes + totalComments
-  
+
   const avgLikes = filteredVideos.length > 0 ? totalLikes / filteredVideos.length : 0
   const avgComments = filteredVideos.length > 0 ? totalComments / filteredVideos.length : 0
 
   // 4. Command Console Intelligence (Activity & Viral Engine)
   const postingActivity = useMemo(() => {
     if (initialVideos.length < 2) return { status: 'UNKNOWN', label: 'NEW CHANNEL', tooltip: 'Not enough data to determine tempo.' }
-    
+
     const now = new Date().getTime()
     const lastPostDate = new Date(initialVideos[0].publishedAt).getTime()
     const daysSinceLast = (now - lastPostDate) / (1000 * 60 * 60 * 24)
-    
+
     // Last 10 videos cadence
     const recentBatch = initialVideos.slice(0, Math.min(10, initialVideos.length))
     const totalDaysSpan = (new Date(recentBatch[0].publishedAt).getTime() - new Date(recentBatch[recentBatch.length - 1].publishedAt).getTime()) / (1000 * 60 * 60 * 24)
@@ -123,11 +123,11 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
 
       {/* 1. Global Time Filter Header */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 bg-[#0A0A0A] border border-zinc-800 p-3 sm:pl-6 rounded-xl">
-        <h2 className="text-zinc-500 font-bold text-xs uppercase tracking-widest flex items-center">
+        <h2 className="text-zinc-400 font-bold text-sm sm:text-base uppercase tracking-widest flex items-center">
           Global Analysis Horizon
           <TooltipHelp text="Select a data cohort to instantly recalculate all median baselines, outlier scores, and historical trajectories strictly based on those recency blocks." />
         </h2>
-        <div className="flex bg-black/50 border border-zinc-800 p-1 rounded-lg gap-1 shadow-inner overflow-x-auto w-fit mx-auto sm:mx-0 sm:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="grid grid-cols-2 sm:flex bg-zinc-900/50 border border-zinc-800 p-1 rounded-xl gap-1 shadow-inner w-full sm:w-auto relative z-10">
           {[
             { id: '15', label: 'LAST 15 VIDEOS', sub: 'Short-term trend' },
             { id: '50', label: 'LAST 50 VIDEOS', sub: 'Mid-term trend' },
@@ -138,23 +138,23 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
               key={tf.id}
               onClick={() => handleTimeFilter(tf.id as any)}
               className={cn(
-                "px-4 sm:px-6 py-1.5 sm:py-2 rounded-md flex flex-col items-center justify-center transition-all duration-300 shrink-0 cursor-pointer",
+                "px-2 sm:px-4 py-1 sm:py-2 rounded-lg flex flex-col items-center justify-center transition-all duration-300 cursor-pointer",
                 timeFilter === tf.id
-                  ? "bg-white text-black font-bold"
-                  : "text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800/50"
+                  ? "bg-white text-black shadow-sm"
+                  : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
               )}
             >
-              <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase whitespace-nowrap">{tf.label}</span>
-              <span className="text-[9px] sm:text-[11px] opacity-70 tracking-wide font-medium mt-0.5 whitespace-nowrap">{tf.sub}</span>
+              <span className="text-[9px] sm:text-[11px] font-bold tracking-widest uppercase">{tf.label}</span>
+              <span className="text-[8px] sm:text-[10px] opacity-70 tracking-wide font-medium mt-0.5">{tf.sub}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* 2. Channel Overview Card (Command Console Layout) */}
-      <a 
-        href={`https://youtube.com/channel/${channel.id}`} 
-        target="_blank" 
+      <a
+        href={`https://youtube.com/channel/${channel.id}`}
+        target="_blank"
         rel="noopener noreferrer"
         className="grid grid-cols-1 lg:grid-cols-5 gap-5 sm:gap-8 bg-[#0A0A0A] border border-zinc-800 p-4 sm:p-8 rounded-xl hover:border-zinc-700 transition-all duration-300 group cursor-pointer"
       >
@@ -183,9 +183,9 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
           </div>
           <div className={cn(
             "bg-zinc-900/50 border rounded-lg p-3 flex flex-col justify-center relative overflow-visible",
-            postingActivity.status === 'SUCCESS' ? "border-emerald-900/50" : 
-            postingActivity.status === 'WARNING' ? "border-amber-900/50" : 
-            postingActivity.status === 'CRITICAL' ? "border-red-900/50" : "border-zinc-800"
+            postingActivity.status === 'SUCCESS' ? "border-emerald-900/50" :
+              postingActivity.status === 'WARNING' ? "border-amber-900/50" :
+                postingActivity.status === 'CRITICAL' ? "border-red-900/50" : "border-zinc-800"
           )}>
             <div className="flex items-center justify-between">
               <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Activity</span>
@@ -193,9 +193,9 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
             </div>
             <span className={cn(
               "text-lg font-black tracking-tighter",
-              postingActivity.status === 'SUCCESS' ? "text-emerald-400" : 
-              postingActivity.status === 'WARNING' ? "text-amber-400" : 
-              postingActivity.status === 'CRITICAL' ? "text-red-400" : "text-white"
+              postingActivity.status === 'SUCCESS' ? "text-emerald-400" :
+                postingActivity.status === 'WARNING' ? "text-amber-400" :
+                  postingActivity.status === 'CRITICAL' ? "text-red-400" : "text-white"
             )}>
               {postingActivity.label}
             </span>
@@ -284,10 +284,10 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
                       sortBy === type ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-200"
                     )}
                   >
-                    {type === 'date' ? 'NEWEST' : 
-                     type === 'views' ? 'MOST VIEWED' : 
-                     type === 'engagement' ? 'MOST ENGAGING' : 
-                     'TOP OUTLIERS'}
+                    {type === 'date' ? 'NEWEST' :
+                      type === 'views' ? 'MOST VIEWED' :
+                        type === 'engagement' ? 'MOST ENGAGING' :
+                          'TOP OUTLIERS'}
                   </button>
                 ))}
               </div>
@@ -297,7 +297,7 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
                 onClick={() => {
                   const csvRows = sortedVideos.map(v => `"${v.title.replace(/"/g, '""')}","${formatDate(v.publishedAt)}",${v.viewCount},${(v.viewCount / medianViews).toFixed(2)}x,${v.engagementRate?.toFixed(2) || 0},"https://youtube.com/watch?v=${v.id}"`).join("\n");
                   const prompt = `Act as an expert YouTube strategist. Give me detailed insights on this channel based on my analytics data. Look for trends, specify what causes their viral outliers, identify brilliant formats and highlight any content gaps.\n\nHere is the raw data:\nTitle,Published Date,Views,Outlier Score,Engagement %,URL\n${csvRows}`;
-                  
+
                   const copyToClipboard = (text: string) => {
                     if (navigator.clipboard && window.isSecureContext) {
                       return navigator.clipboard.writeText(text);
@@ -332,8 +332,8 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
                 disabled={isAiCopied}
                 className={cn(
                   "flex items-center justify-center gap-2 px-4 py-2 text-[10px] sm:text-xs font-bold tracking-widest rounded-md transition-all border w-full sm:w-auto cursor-pointer",
-                  isAiCopied 
-                    ? "bg-white text-black border-transparent" 
+                  isAiCopied
+                    ? "bg-white text-black border-transparent"
                     : "bg-white hover:bg-zinc-200 text-black border-transparent"
                 )}
               >
