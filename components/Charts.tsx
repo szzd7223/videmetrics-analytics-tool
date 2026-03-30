@@ -73,8 +73,8 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 w-full">
       {/* 1. Channel Health Trend (Multi-Metric Composed Chart) */}
       <div className="w-full h-[320px] sm:h-[400px] lg:h-[450px] bg-[#0A0A0A] border border-zinc-800 p-3 sm:p-6 rounded-xl flex flex-col pt-4 sm:pt-6 group transition-all duration-500 relative">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-4 shrink-0 px-1 sm:px-2">
-          <div className="w-full sm:w-auto text-center sm:text-left">
+        <div className="flex flex-col items-center sm:items-start mb-6 sm:mb-8 gap-4 sm:gap-5 shrink-0 px-1 sm:px-2">
+          <div className="w-full text-center sm:text-left">
             <h3 className="text-zinc-500 font-bold tracking-widest text-[10px] sm:text-xs uppercase mb-1 flex items-center justify-center sm:justify-start gap-2">
                Channel Health Trend
                <div className="group/cht relative hidden sm:inline-flex cursor-help align-middle">
@@ -87,15 +87,16 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
             </h3>
             <p className="text-zinc-600 text-[10px] font-medium tracking-wide">Historical algorithmic trajectories</p>
           </div>
-          <div className="flex items-center bg-transparent border border-zinc-800 p-1 rounded-md shadow-inner max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] w-full sm:w-auto">
-            {(['views', 'likes', 'comments', 'engagementRate'] as MetricType[]).map((metric, i, arr) => (
+          <div className="flex bg-zinc-900/50 border border-zinc-800 p-1 rounded-lg w-full sm:w-auto shadow-inner relative z-10">
+            {(['views', 'likes', 'comments', 'engagementRate'] as MetricType[]).map((metric) => (
               <button
                 key={metric}
                 onClick={() => setActiveMetric(metric)}
                 className={cn(
-                  "px-3 sm:px-4 py-1.5 rounded-sm text-[8px] sm:text-[9px] font-bold tracking-widest uppercase transition-colors shrink-0 cursor-pointer",
-                  activeMetric === metric ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30",
-                  i === arr.length - 1 && "mr-1" // prevents right-edge clip
+                  "flex-1 sm:flex-none px-3 sm:px-5 py-1.5 rounded-md text-[8px] sm:text-[9px] font-bold tracking-widest uppercase transition-all duration-300 whitespace-nowrap cursor-pointer select-none",
+                  activeMetric === metric 
+                    ? "bg-white text-black shadow-[0_0_10px_rgba(255,255,255,0.1)]" 
+                    : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
                 )}
               >
                 {metric === 'engagementRate' ? 'ENGAGEMENT' : metric}
@@ -194,9 +195,9 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
       {/* 2. Views vs Likes Ratio (Scatter Plot) */}
       <div className="w-full h-[320px] sm:h-[400px] lg:h-[450px] bg-[#0A0A0A] border border-zinc-800 p-3 sm:p-6 rounded-xl flex flex-col relative group pt-4 sm:pt-6 transition-all duration-500">
         
-        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-4 sm:mb-6 gap-3 sm:gap-4 shrink-0 px-1 sm:px-2 relative z-10">
-          <div className="w-full xl:w-auto text-center xl:text-left">
-            <h3 className="text-zinc-500 font-bold tracking-widest text-[10px] sm:text-xs uppercase mb-1 flex items-center justify-center xl:justify-start gap-2">
+        <div className="flex flex-col items-center sm:items-start mb-6 sm:mb-8 gap-4 sm:gap-5 shrink-0 px-1 sm:px-2 relative z-10">
+          <div className="w-full text-center sm:text-left">
+            <h3 className="text-zinc-500 font-bold tracking-widest text-[10px] sm:text-xs uppercase mb-1 flex items-center justify-center sm:justify-start gap-2">
               Views vs Likes Matrix
               <div className="group/mx relative hidden sm:inline-flex cursor-help align-middle">
                  <div className="w-3.5 h-3.5 rounded-sm border border-zinc-700 text-zinc-400 flex items-center justify-center text-[9px] font-bold hover:bg-white hover:text-black transition-colors bg-zinc-900">?</div>
@@ -208,7 +209,7 @@ export default function Charts({ videos }: { videos: VideoInfo[] }) {
             </h3>
             <p className="text-zinc-600 text-[10px] font-medium tracking-wide">Categorizing video performance traits</p>
           </div>
-          <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-2 justify-center xl:justify-end w-full xl:w-auto">
+          <div className="flex flex-wrap gap-x-3 sm:gap-x-4 gap-y-2 justify-center sm:justify-start w-full sm:w-auto">
              <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div><span className="text-[8px] sm:text-[9px] font-bold tracking-widest uppercase text-zinc-500">Hits</span></div>
              <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div><span className="text-[8px] sm:text-[9px] font-bold tracking-widest uppercase text-zinc-500">Bait</span></div>
              <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]"></div><span className="text-[8px] sm:text-[9px] font-bold tracking-widest uppercase text-zinc-500">Underrated</span></div>

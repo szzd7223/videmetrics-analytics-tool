@@ -127,7 +127,7 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
           Global Analysis Horizon
           <TooltipHelp text="Select a data cohort to instantly recalculate all median baselines, outlier scores, and historical trajectories strictly based on those recency blocks." />
         </h2>
-        <div className="flex bg-black/50 border border-zinc-800 p-1 rounded-lg gap-1 shadow-inner overflow-x-auto w-full sm:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex bg-black/50 border border-zinc-800 p-1 rounded-lg gap-1 shadow-inner overflow-x-auto w-fit mx-auto sm:mx-0 sm:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {[
             { id: '15', label: 'LAST 15 VIDEOS', sub: 'Short-term trend' },
             { id: '50', label: 'LAST 50 VIDEOS', sub: 'Mid-term trend' },
@@ -272,14 +272,17 @@ export default function Dashboard({ channel, initialVideos }: { channel: Channel
       <div className="space-y-6 pt-4">
         {filteredVideos.length > 0 && (
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 sm:gap-4 bg-[#0A0A0A] p-3 sm:p-4 border border-zinc-800 rounded-xl">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest shrink-0">Video Library</span>
+            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest shrink-0 text-center sm:text-left">Video Library</span>
               <div className="flex bg-zinc-900 border border-zinc-800 p-1 rounded-lg gap-1 overflow-x-auto w-full sm:w-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {['date', 'engagement', 'outlier'].map((type) => (
                   <button
                     key={type}
                     onClick={() => handleSort(type as any)}
-                    className={cn("px-3 sm:px-4 py-1.5 rounded-md text-[10px] sm:text-xs font-semibold tracking-wide transition-colors cursor-pointer shrink-0", sortBy === type ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-200")}
+                    className={cn(
+                      "flex-1 sm:flex-none px-3 sm:px-4 py-1.5 rounded-md text-[10px] sm:text-xs font-semibold tracking-wide transition-colors cursor-pointer shrink-0 whitespace-nowrap",
+                      sortBy === type ? "bg-white text-black" : "text-zinc-500 hover:text-zinc-200"
+                    )}
                   >
                     {type === 'date' ? 'NEWEST' : 
                      type === 'views' ? 'MOST VIEWED' : 
